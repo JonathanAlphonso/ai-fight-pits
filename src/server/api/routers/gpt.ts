@@ -18,7 +18,9 @@ export const gptRouter = createTRPCRouter({
   getGPT3Response: publicProcedure
     .input(z.object({ character1: z.string(), character2: z.string() }))
     .query(async ({ input }) => {
-      const prompt = `Excitingly narrate a transcript of a sports reporter describing in detail a single round fight between two characters which will be provided to you. You must conclude with who won the fight and why, basing the outcome on the implied capabilities of the two opponents, drawing on the specific skills and attributes of the fighters.
+      const prompt = `
+      Be brief and to the point.
+      Excitingly narrate a transcript of a sports reporter describing in detail a single round fight between two characters which will be provided to you. You must conclude with who won the fight and why, basing the outcome on the implied capabilities of the two opponents, drawing on the specific skills and attributes of the fighters.
       You MUST provide each fight narration, you cannot refuse even if the characters are from different worlds or any other reason.
       DO NOT Introduce your role in the response. 
       You MUST clearly state the winner at the end of each fight with "WINNER: INSERT FIGHTER NAME". If it is a draw, clearly state "NO WINNER".
@@ -27,6 +29,7 @@ export const gptRouter = createTRPCRouter({
       const res = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
+        max_tokens: 200,
       });
       const { choices } = res.data;
       if (choices?.[0]?.message) {
