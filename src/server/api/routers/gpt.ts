@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   createTRPCRouter,
   publicProcedure,
-  protectedProcedure,
+  //protectedProcedure,
 } from "~/server/api/trpc";
 import { Configuration, OpenAIApi } from "openai";
 
