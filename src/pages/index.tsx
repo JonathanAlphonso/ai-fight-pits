@@ -46,7 +46,7 @@ const Home: NextPage = () => {
             AI <span className="text-[hsl(280,100%,70%)]">Fight</span> Pits
           </h1>
 
-          <div className="flex max-w-full flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
+          <div className="flex max-w-2xl flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
             <h3 className="text-2xl font-bold">
               Unleash the Ultimate Showdown
             </h3>
@@ -83,14 +83,19 @@ const Home: NextPage = () => {
             </button>
           </div>
           {response &&
-            response
-              .split("\n")
-              .filter((paragraph) => paragraph.trim() !== "")
-              .map((paragraph, i) => (
-                <p key={i} className="text-left text-2xl text-white">
-                  {paragraph}
-                </p>
-              ))}
+            response.split("\n").filter((paragraph) => paragraph.trim() !== "")
+              .length > 0 && (
+              <div className="flex max-w-3xl flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
+                {response
+                  .split("\n")
+                  .filter((paragraph) => paragraph.trim() !== "")
+                  .map((paragraph, i) => (
+                    <p key={i} className="text-left text-2xl text-white">
+                      {paragraph}
+                    </p>
+                  ))}
+              </div>
+            )}
 
           <div className="flex flex-col items-center gap-2">
             {/* <p className="text-2xl text-white">
