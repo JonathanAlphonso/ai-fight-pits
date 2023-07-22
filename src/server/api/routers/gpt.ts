@@ -29,7 +29,7 @@ export const gptRouter = createTRPCRouter({
       const res = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 200,
+        max_tokens: 500,
       });
       const { choices } = res.data;
       if (choices?.[0]?.message) {
