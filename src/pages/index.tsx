@@ -84,9 +84,16 @@ const Home: NextPage = () => {
               Submit
             </button>
           </div>
-          {response && (
-            <p className="text-center text-2xl text-white">{response}</p>
-          )}
+          {response &&
+            response
+              .split("\n")
+              .filter((paragraph) => paragraph.trim() !== "")
+              .map((paragraph, i) => (
+                <p key={i} className="text-left text-2xl text-white">
+                  {paragraph}
+                </p>
+              ))}
+
           <div className="flex flex-col items-center gap-2">
             <p className="text-2xl text-white">
               {hello.data ? hello.data.greeting : "Loading tRPC query..."}
