@@ -1,14 +1,10 @@
 import { type NextPage } from "next";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-//import Link from "next/link";
 import { api } from "~/utils/api";
 import { useState, useEffect } from "react";
-//import { set } from "zod";
 
 const Home: NextPage = () => {
-  //const hello = api.example.hello.useQuery({ text: "from tRPC" });
-
   const [character1, setCharacter1] = useState("");
   const [character2, setCharacter2] = useState("");
   const [response, setResponse] = useState("");
@@ -18,12 +14,12 @@ const Home: NextPage = () => {
       character1,
       character2,
     },
-    { enabled: false } // don't run the query initially
+    { enabled: false }
   );
 
   const handleSubmit = async () => {
     setResponse("Loading...");
-    await gptQuery.refetch(); // refetch the data when the button is clicked
+    await gptQuery.refetch();
   };
 
   useEffect(() => {
@@ -41,11 +37,10 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
+        <div className="container flex max-w-full flex-col items-center justify-center gap-12 px-4 py-16 sm:max-w-2xl ">
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             AI <span className="text-[hsl(280,100%,70%)]">Fight</span> Pits
           </h1>
-
           <div className="flex max-w-2xl flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
             <h3 className="text-2xl font-bold">
               Unleash the Ultimate Showdown
@@ -55,21 +50,20 @@ const Home: NextPage = () => {
               AI narrates their clash in vivid detail!
             </div>
           </div>
-
           <div className="flex-cols-1 sm:flex-cols-2 flex gap-4 md:gap-8">
             <input
               type="text"
               value={character1}
               onChange={(e) => setCharacter1(e.target.value)}
               placeholder="Enter Character 1"
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
+              className="w-full flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 sm:max-w-xs"
             />
             <input
               type="text"
               value={character2}
               onChange={(e) => setCharacter2(e.target.value)}
               placeholder="Enter Character 2"
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
+              className="w-full flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 sm:max-w-xs"
             />
           </div>
           <div className="flex-cols-1 sm:flex-cols-2 flex gap-4 md:gap-8">
@@ -77,7 +71,7 @@ const Home: NextPage = () => {
               onClick={() => {
                 handleSubmit().catch((error) => console.error(error));
               }}
-              className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+              className="w-full rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20 sm:w-auto"
             >
               Submit
             </button>
@@ -96,11 +90,7 @@ const Home: NextPage = () => {
                   ))}
               </div>
             )}
-
           <div className="flex flex-col items-center gap-2">
-            {/* <p className="text-2xl text-white">
-              {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-            </p> */}
             <AuthShowcase />
           </div>
         </div>
@@ -115,7 +105,7 @@ const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
 
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined, // no input
+    undefined,
     { enabled: sessionData?.user !== undefined }
   );
 
