@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 //import { set } from "zod";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  //const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
   const [character1, setCharacter1] = useState("");
   const [character2, setCharacter2] = useState("");
