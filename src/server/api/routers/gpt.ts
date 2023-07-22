@@ -50,7 +50,7 @@ export const gptRouter = createTRPCRouter({
           ),
         ]);
 
-        if ((res as CreateChatCompletionResponse).choices) {
+        if (res && (res as CreateChatCompletionResponse).choices) {
           const { choices } = res as CreateChatCompletionResponse;
           if (choices?.[0]?.message) {
             return choices[0].message.content;
@@ -58,10 +58,12 @@ export const gptRouter = createTRPCRouter({
             throw new Error("No response from GPT-3");
           }
         } else {
-          throw new Error(`Error: ${res}`);
+          throw new Error(`Error: ${res ? res.toString() : "res is falsy"}`);
         }
       } catch (error) {
-        throw new Error(`Error: ${error?.toString()}`);
+        throw new Error(
+          `Error: ${error ? error.toString() : "error is falsy"}`
+        );
       }
     }),
 });
