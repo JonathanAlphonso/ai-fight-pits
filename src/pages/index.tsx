@@ -76,7 +76,9 @@ const Home: NextPage = () => {
           </div>
           <div className="flex-cols-1 sm:flex-cols-2 flex gap-4 md:gap-8">
             <button
-              onClick={handleSubmit}
+              onClick={async () => {
+                await handleSubmit();
+              }}
               className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
             >
               Submit
