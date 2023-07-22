@@ -19,7 +19,7 @@ export const gptRouter = createTRPCRouter({
     .input(z.object({ character1: z.string(), character2: z.string() }))
     .query(async ({ input }) => {
       const prompt = `
-      Be brief and to the point.
+      Be brief and to the point, you MUST NOT EXCEED 300 TOKENS.
       Excitingly narrate a transcript of a sports reporter describing in detail a single round fight between two characters which will be provided to you. You must conclude with who won the fight and why, basing the outcome on the implied capabilities of the two opponents, drawing on the specific skills and attributes of the fighters.
       You MUST provide each fight narration, you cannot refuse even if the characters are from different worlds or any other reason.
       DO NOT Introduce your role in the response. 
@@ -29,7 +29,7 @@ export const gptRouter = createTRPCRouter({
       const res = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
-        max_tokens: 500,
+        max_tokens: 300,
       });
       const { choices } = res.data;
       if (choices?.[0]?.message) {
