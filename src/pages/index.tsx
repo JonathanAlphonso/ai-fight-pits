@@ -29,9 +29,7 @@ const Home: NextPage = () => {
   useEffect(() => {
     if (gptQuery.data) {
       console.log(gptQuery.data);
-      setResponse(
-        (gptQuery.data as string) || "No response received from API."
-      );
+      setResponse(gptQuery.data || "No response received from API.");
     }
   }, [gptQuery.data]);
 

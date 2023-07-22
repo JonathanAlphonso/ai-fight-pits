@@ -61,7 +61,7 @@ export const gptRouter = createTRPCRouter({
           throw new Error(`Error: ${res}`);
         }
       } catch (error) {
-        throw new Error(`Error: ${error}`);
+        throw new Error(`Error: ${error?.toString()}`);
       }
     }),
 });
