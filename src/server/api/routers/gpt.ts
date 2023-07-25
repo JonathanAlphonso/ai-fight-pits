@@ -45,9 +45,7 @@ export const gptRouter = createTRPCRouter({
               max_tokens: 400,
             })
             .then((response) => response.data as CreateChatCompletionResponse),
-          new Promise((_, reject) =>
-            setTimeout(reject, 10000, "Timeout Error")
-          ),
+          new Promise((_, reject) => setTimeout(reject, 9800, "Timeout Error")),
         ]);
 
         if (res && (res as CreateChatCompletionResponse).choices) {

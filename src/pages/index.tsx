@@ -19,7 +19,20 @@ const Home: NextPage = () => {
 
   const handleSubmit = async () => {
     setResponse("Loading...");
-    await gptQuery.refetch();
+    try {
+      await gptQuery.refetch();
+    } catch (error: unknown) {
+      console.error(error);
+      if (error instanceof Error) {
+        if (error.message === "Timeout Error") {
+          setResponse("Request timed out.");
+        } else {
+          setResponse("An unexpected error occurred.");
+        }
+      } else {
+        setResponse("An unknown error occurred.");
+      }
+    }
   };
 
   useEffect(() => {
