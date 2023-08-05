@@ -24,25 +24,28 @@ const Home: NextPage = () => {
 
   const filteredParagraphs = getFilteredParagraphs(response || "");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (character1.length < 1 || character2.length < 1) {
-      setCharacterError("Character names must not be blank."); // Update characterError state
-      return;
-    }
-    if (character1.length > 30 || character2.length > 30) {
-      setCharacterError("Character names must not exceed 30 characters."); // Update characterError state
-      return;
-    }
-    setCharacterError(null); // Clear characterError state
-    setResponse("Loading...");
-    try {
-      await gptQuery.refetch();
-    } catch (error: unknown) {
-      setResponse(
-        error instanceof Error ? error.message : "An unknown error occurred."
-      );
-    }
+    (async () => {
+      // Self-invoking async function
+      if (character1.length < 1 || character2.length < 1) {
+        setCharacterError("Character names must be at least 1 character.");
+        return;
+      }
+      if (character1.length > 50 || character2.length > 50) {
+        setCharacterError("Character names must not exceed 50 characters.");
+        return;
+      }
+      setCharacterError(null);
+      setResponse("Loading...");
+      try {
+        await gptQuery.refetch();
+      } catch (error: unknown) {
+        setResponse(
+          error instanceof Error ? error.message : "An unknown error occurred."
+        );
+      }
+    })(); // End of self-invoking async function
   };
 
   useEffect(() => {
