@@ -31,7 +31,18 @@ const openai = new OpenAIApi(configuration);
 
 export const gptRouter = createTRPCRouter({
   getGPT3Response: publicProcedure
-    .input(z.object({ character1: z.string(), character2: z.string() }))
+    .input(
+      z.object({
+        character1: z
+          .string()
+          .min(1, "Character 1 must not be blank")
+          .max(30, "Character 1 must not exceed 30 characters"),
+        character2: z
+          .string()
+          .min(1, "Character 2 must not be blank")
+          .max(30, "Character 2 must not exceed 30 characters"),
+      })
+    )
     .query(async ({ input }) => {
       const prompt = `Please vividly describe a single round fight between the characters ${input.character1} and ${input.character2}. Your description should be exciting and detailed, focusing on the specific skills and attributes of the fighters. At the conclusion of the fight, clearly state the winner and provide a compelling explanation based on the implied capabilities of the two opponents.
         Remember to focus on the fight itself and provide a thrilling narrative that brings the action to life. Avoid introducing your role in the response and ensure that the description remains concise and within the specified word limit of 150 words.`;
