@@ -26,7 +26,7 @@ const Home: NextPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    (async () => {
+    void (async () => {
       // Self-invoking async function
       if (character1.length < 1 || character2.length < 1) {
         setCharacterError("Character names must be at least 1 character.");
