@@ -1,59 +1,17 @@
 import { NextPage } from "next";
-import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import { api } from "~/utils/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import AuthShowcase from "~/components/AuthShowcase";
+import CharacterForm from "~/components/CharacterForm";
 
 const Home: NextPage = () => {
-  const [character1, setCharacter1] = useState("");
-  const [character2, setCharacter2] = useState("");
   const [response, setResponse] = useState("");
-  const [characterError, setCharacterError] = useState<string | null>(null); // Define characterError state
-
-  const gptQuery = api.gpt.getGPT3Response.useQuery(
-    {
-      character1,
-      character2,
-    },
-    { enabled: false }
-  );
 
   const getFilteredParagraphs = (text: string) => {
     return text.split("\n").filter((paragraph) => paragraph.trim() !== "");
   };
 
   const filteredParagraphs = getFilteredParagraphs(response || "");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    void (async () => {
-      // Self-invoking async function
-      if (character1.length < 1 || character2.length < 1) {
-        setCharacterError("Character names must be at least 1 character.");
-        return;
-      }
-      if (character1.length > 50 || character2.length > 50) {
-        setCharacterError("Character names must not exceed 50 characters.");
-        return;
-      }
-      setCharacterError(null);
-      setResponse("Loading...");
-      try {
-        await gptQuery.refetch();
-      } catch (error: unknown) {
-        setResponse(
-          error instanceof Error ? error.message : "An unknown error occurred."
-        );
-      }
-    })(); // End of self-invoking async function
-  };
-
-  useEffect(() => {
-    if (gptQuery.data) {
-      console.log(gptQuery.data);
-      setResponse(gptQuery.data || "No response received from API.");
-    }
-  }, [gptQuery.data]);
 
   return (
     <>
@@ -76,37 +34,7 @@ const Home: NextPage = () => {
               AI narrates their clash in vivid detail!
             </div>
           </div>
-          <form onSubmit={handleSubmit}>
-            <div className="flex-cols-1 sm:flex-cols-2 flex gap-4 md:gap-8">
-              <input
-                type="text"
-                value={character1}
-                onChange={(e) => setCharacter1(e.target.value)}
-                placeholder="Enter Character 1"
-                className="w-full flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 sm:max-w-xs"
-              />
-              <input
-                type="text"
-                value={character2}
-                onChange={(e) => setCharacter2(e.target.value)}
-                placeholder="Enter Character 2"
-                className="w-full flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20 sm:max-w-xs"
-              />
-            </div>
-            {characterError && (
-              <div className="mt-2 flex justify-center text-red-500">
-                {characterError}
-              </div>
-            )}
-            <div className="mt-12 flex justify-center gap-4 md:gap-8">
-              <button
-                type="submit"
-                className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
+          <CharacterForm setResponse={setResponse} />
           {filteredParagraphs.length > 0 && (
             <div className="flex max-w-3xl flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
               {filteredParagraphs.map((paragraph, i) => (
@@ -126,27 +54,3 @@ const Home: NextPage = () => {
 };
 
 export default Home;
-
-const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
-
-  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
-    undefined,
-    { enabled: sessionData?.user !== undefined }
-  );
-
-  return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
-        {secretMessage && <span> - {secretMessage}</span>}
-      </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
-      >
-        {sessionData ? "Sign out" : "Sign in"}
-      </button>
-    </div>
-  );
-};
