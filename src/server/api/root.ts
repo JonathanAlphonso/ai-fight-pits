@@ -1,3 +1,4 @@
+import { fightRouter } from "./routers/fight";
 import { exampleRouter } from "~/server/api/routers/example";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { gptRouter } from "~/server/api/routers/gpt";
@@ -10,6 +11,7 @@ import { gptRouter } from "~/server/api/routers/gpt";
 export const appRouter = createTRPCRouter({
   example: exampleRouter,
   gpt: gptRouter,
+  fight: fightRouter,
 });
 
 // export type definition of API
