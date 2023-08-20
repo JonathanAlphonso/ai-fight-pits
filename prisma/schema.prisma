@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["jsonProtocol"]
+  //previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
@@ -21,6 +21,7 @@ model User {
 
   //not related to Next Auth below
   currency      Int       @default(0)
+  fights    Fight[]   // Fights created by the user
 }
 
 model Account {
@@ -48,6 +49,7 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
 }
 
 model VerificationToken {
@@ -66,13 +68,17 @@ model Fighter {
 }
 
 model Fight {
-  id         Int       @id @default(autoincrement())
-  fightLog   Json
-  fighter1Id Int
-  fighter2Id Int
-  winnerId   Int?
-  time       DateTime  @default(now())
+  id          Int       @id @default(autoincrement())
+  fightLog    Json
+  fighter1Id  Int
+  fighter2Id  Int
+  winnerId    Int?
+  time        DateTime  @default(now())
+  createdById String  
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  @@index([createdById])
 }
+
 
 model Bet {
   id        Int      @id @default(autoincrement())
@@ -82,4 +88,5 @@ model Bet {
   time      DateTime @default(now())
   fightId   Int
   user      User     @relation(fields: [userId], references: [id])
+  @@index([userId])
 }
