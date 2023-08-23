@@ -5,7 +5,7 @@ export const fightRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        fightLog: z.any(), // Validate according to your JSON structure
+        fightLog: z.string(), // Validate according to your JSON structure
         fighter1Id: z.number(),
         fighter2Id: z.number(),
         winnerId: z.number().optional(),

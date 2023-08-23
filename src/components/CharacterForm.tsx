@@ -45,7 +45,7 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse }) => {
     if (gptQuery.data) {
       setResponse(gptQuery.data || "No response received from API.");
     }
-  }, [gptQuery.data]);
+  }, [gptQuery.data, setResponse]);
 
   return (
     <form onSubmit={handleSubmit}>
