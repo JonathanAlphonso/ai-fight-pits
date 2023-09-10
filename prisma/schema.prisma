@@ -69,7 +69,7 @@ model Fighter {
 
 model Fight {
   id          Int       @id @default(autoincrement())
-  fightLog    Json
+  fightLog    String    @db.Text
   fighter1Id  Int
   fighter2Id  Int
   winnerId    Int?
