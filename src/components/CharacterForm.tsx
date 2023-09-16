@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 
@@ -11,16 +11,33 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse }) => {
   const [character2, setCharacter2] = useState<string>("");
   const [characterError, setCharacterError] = useState<string | null>(null);
 
+  const createFight = api.fight.create.useMutation();
+  const { data: sessionData } = useSession();
+
   const gptQuery = api.gpt.getGPT3Response.useQuery(
     {
       character1,
       character2,
     },
-    { enabled: false }
+    {
+      enabled: false,
+      onSuccess: (newFight) => {
+        setResponse(newFight || "No response received from API.");
+        if (sessionData?.user) {
+          const postData = () => {
+            createFight.mutate({
+              fightLog: JSON.stringify(newFight),
+              fighter1Id: 1,
+              fighter2Id: 2,
+            });
+          };
+          postData();
+        } else {
+          console.log("No user logged in, not posting fight to database.");
+        }
+      },
+    }
   );
-
-  const createFight = api.fight.create.useMutation();
-  const { data: sessionData } = useSession();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,25 +62,6 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse }) => {
       }
     })();
   };
-
-  useEffect(() => {
-    if (gptQuery.data) {
-      console.log(`Console logged date in useEffect: ${gptQuery.data}`);
-      setResponse(gptQuery.data || "No response received from API.");
-      if (sessionData?.user) {
-        const postData = async () => {
-          await createFight.mutate({
-            fightLog: await JSON.stringify(gptQuery.data),
-            fighter1Id: 1,
-            fighter2Id: 2,
-          });
-        };
-        postData();
-      } else {
-        console.log("No user logged in, not posting fight to database.");
-      }
-    }
-  }, [gptQuery.data, setResponse]);
 
   return (
     <form onSubmit={handleSubmit}>
