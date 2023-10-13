@@ -3,6 +3,7 @@ import Head from "next/head";
 import { useState } from "react";
 import AuthShowcase from "~/components/AuthShowcase";
 import CharacterForm from "~/components/CharacterForm";
+import StoryFormatter from "~/components/StoryFormatter";
 
 const Home: NextPage = () => {
   const [response, setResponse] = useState("");
@@ -35,15 +36,7 @@ const Home: NextPage = () => {
             </div>
           </div>
           <CharacterForm setResponse={setResponse} />
-          {filteredParagraphs.length > 0 && (
-            <div className="flex max-w-3xl flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
-              {filteredParagraphs.map((paragraph, i) => (
-                <p key={i} className="text-left text-2xl text-white">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          )}
+          {response && <StoryFormatter text={response} />}
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
           </div>

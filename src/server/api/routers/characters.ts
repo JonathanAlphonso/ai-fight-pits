@@ -21,18 +21,9 @@ export const fightRouter = createTRPCRouter({
           createdById: ctx.session.user.id, // Assigning the user's ID to createdById
         },
       });
+
+      //void ctx.revalidateSSG?.(`/profiles/${ctx.session.user.id}`);
+
       return fight;
-    }),
-  getAllByUser: protectedProcedure
-    .input(z.object({}))
-    .query(async ({ ctx }) => {
-      const userId = ctx.session.user.id;
-      const fights = await ctx.prisma.fight.findMany({
-        where: {
-          createdById: userId,
-        },
-      });
-      //console.log(fights);
-      return fights;
     }),
 });

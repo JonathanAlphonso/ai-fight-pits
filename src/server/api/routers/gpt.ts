@@ -45,7 +45,7 @@ export const gptRouter = createTRPCRouter({
     )
     .query(async ({ input }) => {
       const prompt = `Please vividly describe a single round fight between the characters ${input.character1} and ${input.character2}. Your description should be exciting and detailed, focusing on the specific skills and attributes of the fighters. At the conclusion of the fight, clearly state the winner and provide a compelling explanation based on the implied capabilities of the two opponents.
-        Remember to focus on the fight itself and provide a thrilling narrative that brings the action to life. Avoid introducing your role in the response and ensure that the description remains concise and within the specified word limit of 150 words.`;
+      At the very end you must add a seperate line with "Winner: ${input.character1}" or "Winner: ${input.character2}" or "Winner: Draw". Remember to focus on the fight itself and provide a thrilling narrative that brings the action to life. Avoid introducing your role in the response and ensure that the description remains concise and within the specified word limit of 150 words.`;
 
       try {
         const res = await Promise.race([
