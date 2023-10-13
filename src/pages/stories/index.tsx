@@ -5,13 +5,20 @@ import { api } from "~/utils/api";
 import { useState, useEffect } from "react";
 import StoryFormatter from "../../components/StoryFormatter"; // Import the new component
 
+// Define a type for Story
+type Story = {
+  fightLog: string;
+  // Add other properties of a story if there are any
+};
+
 const Home: NextPage = () => {
   // Renamed to fetchedStories to avoid shadowing
   const { data: fetchedStories, isLoading } = api.fight.getAllByUser.useQuery(
     {}
   );
 
-  const [stories, setStories] = useState<any[]>(fetchedStories || []); // Initialize to fetchedStories or an empty array
+  // Use Story[] instead of any[] for the stories state
+  const [stories, setStories] = useState<Story[]>(fetchedStories || []); // Initialize to fetchedStories or an empty array
   // Use useEffect to update stories when fetchedStories is available and isLoading is false
   useEffect(() => {
     if (!isLoading && fetchedStories) {
@@ -36,7 +43,7 @@ const Home: NextPage = () => {
             Your Fight Stories
           </h1>
           {stories?.length ?? 0 > 0 ? (
-            stories.map((story, index) => (
+            stories.map((story: Story, index: number) => (
               <div key={index} className="story-container">
                 <StoryFormatter text={story.fightLog} />{" "}
                 {/* Use the new component */}

@@ -8,11 +8,11 @@ import StoryFormatter from "~/components/StoryFormatter";
 const Home: NextPage = () => {
   const [response, setResponse] = useState("");
 
-  const getFilteredParagraphs = (text: string) => {
-    return text.split("\n").filter((paragraph) => paragraph.trim() !== "");
-  };
+  // const getFilteredParagraphs = (text: string) => {
+  //   return text.split("\n").filter((paragraph) => paragraph.trim() !== "");
+  // };
 
-  const filteredParagraphs = getFilteredParagraphs(response || "");
+  // const filteredParagraphs = getFilteredParagraphs(response || "");
 
   return (
     <>

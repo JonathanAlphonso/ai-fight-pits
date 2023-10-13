@@ -1,6 +1,7 @@
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { signIn, signOut } from "next-auth/react";
+import Link from 'next/link';
 
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
@@ -19,9 +20,9 @@ const AuthShowcase: React.FC = () => {
       {sessionData && (
         <p className="text-center text-2xl text-white">
           You can now see your fight stories at{" "}
-          <a href="/stories">
+          <Link href="/stories">
             <u>Stories</u>
-          </a>
+          </Link>
         </p>
       )}
       <button
