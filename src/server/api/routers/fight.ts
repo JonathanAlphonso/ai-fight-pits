@@ -73,6 +73,29 @@ export const fightRouter = createTRPCRouter({
 
     return fight;
   }),
+  delete: protectedProcedure
+  .input(z.number())
+  .mutation(async ({ input: fightId, ctx }) => {
+    // Check if the fight exists and was created by the current user
+    const fight = await ctx.prisma.fight.findUnique({
+      where: { id: fightId },
+    });
+
+    if (!fight) {
+      throw new Error('Fight not found');
+    }
+
+    if (fight.createdById !== ctx.session.user.id) {
+      throw new Error('Not authorized to delete this fight');
+    }
+
+    // Delete the fight
+    await ctx.prisma.fight.delete({
+      where: { id: fightId },
+    });
+
+    return { message: 'Fight deleted successfully' };
+  }),
   getAllByUser: protectedProcedure
   .input(z.object({}))
   .query(async ({ ctx }) => {

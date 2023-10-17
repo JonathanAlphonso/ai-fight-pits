@@ -7,6 +7,7 @@ import StoryList from "~/components/StoryList";
 
 // Define a type for Story
 type Story = {
+  id: number; // Removed undefined
   fightLog: string;
   fighter1Name: string | null;
   fighter2Name: string | null;
