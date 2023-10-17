@@ -1,3 +1,4 @@
+// src/pages/index.tsx
 import type { NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
@@ -5,14 +6,15 @@ import AuthShowcase from "~/components/AuthShowcase";
 import CharacterForm from "~/components/CharacterForm";
 import StoryFormatter from "~/components/StoryFormatter";
 
+type Response = {
+  story: string;
+  fighter1Name: string;
+  fighter2Name: string;
+};
+
 const Home: NextPage = () => {
-  const [response, setResponse] = useState("");
-
-  // const getFilteredParagraphs = (text: string) => {
-  //   return text.split("\n").filter((paragraph) => paragraph.trim() !== "");
-  // };
-
-  // const filteredParagraphs = getFilteredParagraphs(response || "");
+  const [response, setResponse] = useState<Response | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <>
@@ -35,8 +37,16 @@ const Home: NextPage = () => {
               AI narrates their clash in vivid detail!
             </div>
           </div>
-          <CharacterForm setResponse={setResponse} />
-          {response && <StoryFormatter text={response} />}
+          <CharacterForm setResponse={setResponse} setIsLoading={setIsLoading} />
+          {isLoading ? (
+            <div className="text-left text-4xl text-white">Loading...</div>
+          ) : response ? (
+            <StoryFormatter
+              text={response.story}
+              fighter1Name={response.fighter1Name}
+              fighter2Name={response.fighter2Name}
+            />
+          ) : null}
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
           </div>

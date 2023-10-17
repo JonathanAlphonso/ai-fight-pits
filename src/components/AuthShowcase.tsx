@@ -20,7 +20,7 @@ const AuthShowcase: React.FC = () => {
       {sessionData && (
         <p className="text-center text-2xl text-white">
           You can now see your fight stories at{" "}
-          <Link href="/stories">
+          <Link href={`/stories/${sessionData.user.id}`}>
             <u>Stories</u>
           </Link>
         </p>

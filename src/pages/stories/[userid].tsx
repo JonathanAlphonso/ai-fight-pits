@@ -15,7 +15,7 @@ type Story = {
 
 const Home: NextPage = () => {
   // Renamed to fetchedStories to avoid shadowing
-  const { data: fetchedStories, isLoading } = api.fight.getAll.useQuery(
+  const { data: fetchedStories, isLoading } = api.fight.getAllByUser.useQuery(
     {}
   );
 
@@ -40,7 +40,7 @@ const Home: NextPage = () => {
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex max-w-full flex-col items-center justify-center gap-12 px-4 py-16 sm:max-w-2xl ">
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-            All Fight Stories
+            Your Fight Stories
           </h1>
           <StoryList stories={stories} isLoading={isLoading} />
           <div className="flex flex-col items-center gap-2">
