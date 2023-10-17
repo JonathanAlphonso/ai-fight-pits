@@ -1,17 +1,20 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { Context } from "~/server/api/trpc";
 
-function toTitleCase(str: string): string {
-  return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-}
-
-async function getFighterNameById(ctx: any, id: number): Promise<string | null> {
+async function getFighterNameById(ctx: Context, id: number): Promise<string | null> {
   const fighter = await ctx.prisma.fighter.findUnique({
     where: { id: id },
   });
 
   return fighter ? fighter.name : null;
 }
+
+function toTitleCase(str: string): string {
+  return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+
 
 export const fightRouter = createTRPCRouter({
   
