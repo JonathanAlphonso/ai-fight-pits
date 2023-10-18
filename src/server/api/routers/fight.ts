@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure,publicProcedure } from "~/server/api/trpc";
 import { Context } from "~/server/api/trpc";
 
 async function getFighterNameById(ctx: Context, id: number): Promise<string | null> {
@@ -116,7 +116,7 @@ export const fightRouter = createTRPCRouter({
 
     return Promise.all(fightsWithNames);
   }),
-getAll: protectedProcedure
+getAll: publicProcedure
   .input(z.object({}))
   .query(async ({ ctx }) => {
     const fights = await ctx.prisma.fight.findMany();
