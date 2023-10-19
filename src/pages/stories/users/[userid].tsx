@@ -1,36 +1,40 @@
+import { useSession } from "next-auth/react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import AuthShowcase from "~/components/AuthShowcase";
 import { api } from "~/utils/api";
 import { useState, useEffect } from "react";
 import StoryList from "~/components/StoryList";
+import type { Story } from "~/types/types";
 
-// Define a type for Story
-type Story = {
-  id: number; // Removed undefined
-  fightLog: string;
-  fighter1Name: string | null;
-  fighter2Name: string | null;
-  // Add other properties of a story if there are any
-};
 
 const Home: NextPage = () => {
-  // Renamed to fetchedStories to avoid shadowing
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
+  const [stories, setStories] = useState<Story[]>([]);
   const { data: fetchedStories, isLoading } = api.fight.getAllByUser.useQuery(
-    {}
+    {currentUserId}
   );
 
-  // Use Story[] instead of any[] for the stories state
-  const [stories, setStories] = useState<Story[]>(fetchedStories || []); // Initialize to fetchedStories or an empty array
-  // Use useEffect to update stories when fetchedStories is available and isLoading is false
+  
+
   useEffect(() => {
     if (!isLoading && fetchedStories) {
-      setStories(fetchedStories);
+      const updatedStories = fetchedStories.map(story => ({
+        ...story,
+        createdBy: {
+          ...story.createdBy,
+          name: story.createdBy.name || 'Unknown',
+          email: story.createdBy.email || '', // provide a default value
+          image: story.createdBy.image || '', // provide a default value for image
+        },
+        createdById: story.createdBy.id, // assign the ID of the user who created the story
+      }));
+      setStories(updatedStories);
     }
-  }, [fetchedStories, isLoading]); // Dependency array
-
- 
-
+  }, [fetchedStories, isLoading]);
+  // Get the session data
+  const { data: sessionData } = useSession();
   return (
     <>
       <Head>
@@ -43,7 +47,7 @@ const Home: NextPage = () => {
           <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             Your Fight Stories
           </h1>
-          <StoryList stories={stories} isLoading={isLoading} />
+          <StoryList stories={stories} isLoading={isLoading} currentUserId={sessionData?.user?.id ?? null} />
           <div className="flex flex-col items-center gap-2">
             <AuthShowcase />
           </div>

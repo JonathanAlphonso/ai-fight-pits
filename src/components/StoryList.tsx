@@ -2,20 +2,13 @@
 import { api } from "~/utils/api";
 import StoryFormatter from "./StoryFormatter";
 import { useEffect, useState } from "react";
+import type { Story, StoryListProps} from "~/types/types";
 
-type Story = {
-  id: number;
-  fightLog: string;
-  fighter1Name: string | null;
-  fighter2Name: string | null;
-};
-
-type StoryListProps = {
-  stories: Story[];
-  isLoading: boolean;
-};
-
-const StoryList: React.FC<StoryListProps> = ({ stories, isLoading }) => {
+const StoryList: React.FC<StoryListProps> = ({
+  stories,
+  isLoading,
+  currentUserId,
+}) => {
   const [localStories, setLocalStories] = useState<Story[]>([]);
   const deleteFightMutation = api.fight.delete.useMutation();
 
@@ -26,8 +19,8 @@ const StoryList: React.FC<StoryListProps> = ({ stories, isLoading }) => {
   const handleDelete = (id: number) => {
     deleteFightMutation.mutate(id, {
       onSuccess: () => {
-        setLocalStories(localStories.filter(story => story.id !== id));
-      }
+        setLocalStories(localStories.filter((story) => story.id !== id));
+      },
     });
   };
 
@@ -43,12 +36,14 @@ const StoryList: React.FC<StoryListProps> = ({ stories, isLoading }) => {
               fighter1Name={story.fighter1Name || ""}
               fighter2Name={story.fighter2Name || ""}
             />
-            <button
-              onClick={() => handleDelete(story.id)}
-              className="rounded bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600"
-            >
-              Delete
-            </button>
+            {story?.createdBy.id === currentUserId && (
+              <button
+                onClick={() => handleDelete(story.id)}
+                className="rounded bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600"
+              >
+                Delete
+              </button>
+            )}
           </div>
         ))
       ) : (

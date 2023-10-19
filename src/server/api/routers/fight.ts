@@ -1,13 +1,17 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure,publicProcedure } from "~/server/api/trpc";
-import { Context } from "~/server/api/trpc";
+import type { Context } from "~/server/api/trpc";
 
-async function getFighterNameById(ctx: Context, id: number): Promise<string | null> {
+async function getFighterNameById(ctx: Context, id: number): Promise<string> {
   const fighter = await ctx.prisma.fighter.findUnique({
     where: { id: id },
   });
 
-  return fighter ? fighter.name : null;
+  if (!fighter) {
+    throw new Error(`Fighter with id ${id} not found`);
+  }
+
+  return fighter.name;
 }
 
 function toTitleCase(str: string): string {
@@ -104,31 +108,72 @@ export const fightRouter = createTRPCRouter({
       where: {
         createdById: userId,
       },
+      include: { createdBy: true }, // Include the createdBy user
     });
-
-    // Get the names of the fighters
+  
+    // Get the names of the fighters and ensure createdBy.name is not null
     const fightsWithNames = fights.map(async (fight) => {
       const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
       const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
-
-      return { ...fight, fighter1Name, fighter2Name };
+  
+      return { 
+        ...fight, 
+        fighter1Name, 
+        fighter2Name,
+        createdBy: {
+          ...fight.createdBy,
+          name: fight.createdBy.name || 'Unknown',
+        },
+      };
     });
-
+  
     return Promise.all(fightsWithNames);
   }),
-getAll: publicProcedure
-  .input(z.object({}))
+  getAll: publicProcedure
   .query(async ({ ctx }) => {
-    const fights = await ctx.prisma.fight.findMany();
-
-    // Get the names of the fighters
+    const fights = await ctx.prisma.fight.findMany({
+      include: { createdBy: true }, // Include the createdBy user
+    });
+  
+    // Get the names of the fighters and ensure createdBy.name is not null
     const fightsWithNames = fights.map(async (fight) => {
       const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
       const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
-
-      return { ...fight, fighter1Name, fighter2Name };
+  
+      return { 
+        ...fight, 
+        fighter1Name, 
+        fighter2Name,
+        createdBy: {
+          ...fight.createdBy,
+          name: fight.createdBy.name || 'Unknown',
+        },
+      };
+    });
+  
+    return Promise.all(fightsWithNames);
+  }),
+  getOne: publicProcedure
+  .input(z.number())
+  .query(async ({ input: fightId, ctx }) => {
+    const fight = await ctx.prisma.fight.findUnique({
+      where: { id: fightId },
+      include: { createdBy: true }, // Include the createdBy user
     });
 
-    return Promise.all(fightsWithNames);
+    if (!fight) {
+      throw new Error('Fight not found');
+    }
+
+    const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
+    const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+
+    return { 
+      ...fight, 
+      fighter1Name, 
+      fighter2Name,
+      createdBy: fight.createdBy, // Return the createdBy user
+      id: fight.id, // Return the id of the fight
+    };
   }),
 });
