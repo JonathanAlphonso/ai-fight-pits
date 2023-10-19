@@ -2,7 +2,8 @@
 import { api } from "~/utils/api";
 import StoryFormatter from "./StoryFormatter";
 import { useEffect, useState } from "react";
-import type { Story, StoryListProps} from "~/types/types";
+import Link from "next/link";
+import type { Story, StoryListProps } from "~/types/types";
 
 const StoryList: React.FC<StoryListProps> = ({
   stories,
@@ -37,13 +38,21 @@ const StoryList: React.FC<StoryListProps> = ({
               fighter2Name={story.fighter2Name || ""}
             />
             {story?.createdBy.id === currentUserId && (
-              <button
-                onClick={() => handleDelete(story.id)}
-                className="rounded bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600"
-              >
-                Delete
-              </button>
+              <>
+                <button
+                  onClick={() => handleDelete(story.id)}
+                  className="rounded bg-red-500 px-4 py-2 text-white transition-colors hover:bg-red-600"
+                >
+                  Delete
+                </button>{" "}
+              </>
             )}
+            <Link
+              href={`/stories/${story?.id}`}
+              className="cursor-pointer text-blue-500 hover:underline"
+            >
+              Link to Story Page
+            </Link>
           </div>
         ))
       ) : (

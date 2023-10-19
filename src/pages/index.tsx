@@ -5,6 +5,7 @@ import { useState } from "react";
 import AuthShowcase from "~/components/AuthShowcase";
 import CharacterForm from "~/components/CharacterForm";
 import StoryFormatter from "~/components/StoryFormatter";
+import Link from "next/link";
 
 type Response = {
   story: string;
@@ -37,7 +38,10 @@ const Home: NextPage = () => {
               AI narrates their clash in vivid detail!
             </div>
           </div>
-          <CharacterForm setResponse={setResponse} setIsLoading={setIsLoading} />
+          <CharacterForm
+            setResponse={setResponse}
+            setIsLoading={setIsLoading}
+          />
           {isLoading ? (
             <div className="text-left text-4xl text-white">Loading...</div>
           ) : response ? (
@@ -48,6 +52,9 @@ const Home: NextPage = () => {
             />
           ) : null}
           <div className="flex flex-col items-center gap-2">
+            <Link href="/stories/" className="text-2xl text-white underline hover:text-blue-500 transition-colors">
+              View All Stories
+            </Link>
             <AuthShowcase />
           </div>
         </div>
