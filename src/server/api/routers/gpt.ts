@@ -1,32 +1,12 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { Configuration, OpenAIApi } from "openai";
+import type {CreateChatCompletionResponse} from "../../../types/types";
 
-type CreateChatCompletionResponse = {
-  id: string;
-  object: string;
-  created: number;
-  model: string;
-  usage: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-  choices: [
-    {
-      message: {
-        role: string;
-        content: string;
-      };
-      finish_reason: string;
-    }
-  ];
-};
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
-console.log("OpenAI API key: ", process.env.OPENAI_API_KEY);
 const openai = new OpenAIApi(configuration);
 
 export const gptRouter = createTRPCRouter({
@@ -64,13 +44,14 @@ export const gptRouter = createTRPCRouter({
         if (res && (res as CreateChatCompletionResponse).choices) {
           const { choices } = res as CreateChatCompletionResponse;
           if (choices?.[0]?.message) {
+            if (choices[0].message.content.length < 200) {
+              throw new Error("Fighters not permitted. Try different fighters.");
+            }
             return choices[0].message.content;
           } else {
             throw new Error("No response from GPT-3");
           }
-        } else {
-          throw new Error(`Error: ${res ? res.toString() : "res is falsy"}`);
-        }
+        } 
       } catch (error) {
         throw new Error(
           `Error: ${error ? error.toString() : "error is falsy"}`

@@ -9,7 +9,6 @@ interface StoryFormatterProps {
 
 
 const StoryFormatter: React.FC<StoryFormatterProps> = ({ text,fighter1Name,fighter2Name }) => {
-  console.log(text);
   // Remove quotes if they exist at the start and end of the string
   const trimmedText =
     text[0] === '"' && text[text.length - 1] === '"' ? text.slice(1, -1) : text;

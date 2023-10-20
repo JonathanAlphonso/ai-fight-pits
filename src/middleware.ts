@@ -8,7 +8,7 @@ import {
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.cachedFixedWindow(5, "60s"),
+  limiter: Ratelimit.cachedFixedWindow(10, "60s"),
   ephemeralCache: new Map(),
   analytics: true,
 });
@@ -17,7 +17,7 @@ export default async function middleware(
   request: NextRequest,
   event: NextFetchEvent
 ): Promise<Response | undefined> {
-  //console.log("middleware.ts: request: ", request);
+
   const ip = request.ip ?? "127.0.0.1";
 
   // Early escape if hitting the "blocked" redirect

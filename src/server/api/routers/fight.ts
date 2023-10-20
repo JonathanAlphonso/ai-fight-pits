@@ -100,15 +100,17 @@ export const fightRouter = createTRPCRouter({
 
     return { message: 'Fight deleted successfully' };
   }),
-  getAllByUser: protectedProcedure
-  .input(z.object({}))
-  .query(async ({ ctx }) => {
-    const userId = ctx.session.user.id;
-    const fights = await ctx.prisma.fight.findMany({
+  getAllByUser: publicProcedure
+  .input(z.object({ userid: z.string() })) // accept userid as input
+  .query(async ({ input, ctx }) => {
+    const { userid } = input; // get the userid from the input
+    console.log(`User ID used to fetch fights: ${userid}`); // Add this line
+      const fights = await ctx.prisma.fight.findMany({
       where: {
-        createdById: userId,
+        createdById: userid, // use the userid to fetch the fights
       },
       include: { createdBy: true }, // Include the createdBy user
+      orderBy: { time: 'desc' }, // Order by creation date in descending order
     });
   
     // Get the names of the fighters and ensure createdBy.name is not null
@@ -133,6 +135,7 @@ export const fightRouter = createTRPCRouter({
   .query(async ({ ctx }) => {
     const fights = await ctx.prisma.fight.findMany({
       include: { createdBy: true }, // Include the createdBy user
+      orderBy: { time: 'desc' }, // Order by creation date in descending order
     });
   
     // Get the names of the fighters and ensure createdBy.name is not null

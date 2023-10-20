@@ -49,7 +49,7 @@ const StoryList: React.FC<StoryListProps> = ({
             )}
             <Link
               href={`/stories/${story?.id}`}
-              className="cursor-pointer text-blue-500 hover:underline"
+              className="mt-2 inline-block rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-700"
             >
               Link to Story Page
             </Link>

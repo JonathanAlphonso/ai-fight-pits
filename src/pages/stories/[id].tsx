@@ -1,12 +1,11 @@
 import type { NextPage } from "next";
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 import Head from "next/head";
 import AuthShowcase from "~/components/AuthShowcase";
 import { api } from "~/utils/api";
 import StoryFormatter from "~/components/StoryFormatter";
-import Link from 'next/link';
-//import { Story } from "~/types/types";
-
+import Link from "next/link";
+import NavBar from "~/components/NavBar";
 
 const StoryPage: NextPage = () => {
   const router = useRouter();
@@ -16,8 +15,11 @@ const StoryPage: NextPage = () => {
 
   return (
     <>
+      <NavBar />
       <Head>
-        <title>{story?.fighter1Name} vs {story?.fighter2Name}</title>
+        <title>
+          {story?.fighter1Name} vs {story?.fighter2Name}
+        </title>
         <meta name="description" content="Fight story" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -27,12 +29,14 @@ const StoryPage: NextPage = () => {
             <div className="text-2xl text-white">Loading...</div>
           ) : (
             <>
-              <div className="text-2xl text-white mb-4 flex justify-start">
+              <div className="mb-4 flex justify-start text-2xl text-white">
                 <p>Story ID: {story?.id} |&nbsp;</p>
                 <p>
                   Story created by:&nbsp;
-                  <Link href={`/stories/users/${story?.createdBy.id ?? ''}`}>
-                    <span className="text-blue-500 hover:underline cursor-pointer">{story?.createdBy.name}</span>
+                  <Link href={`/stories/users/${story?.createdBy.id ?? ""}`}>
+                    <span className="cursor-pointer text-blue-500 hover:underline">
+                      {story?.createdBy.name}
+                    </span>
                   </Link>
                 </p>
               </div>
