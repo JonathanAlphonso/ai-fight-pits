@@ -1,7 +1,7 @@
-import { useRouter } from 'next/router';
+
 
 function Footer() {
-  const router = useRouter();
+
 
   return (
     <footer className="flex items-center justify-center w-full h-24 border-t bg-[#2e026d] border-white p-4 px-6">

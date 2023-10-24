@@ -10,7 +10,7 @@ const AllUserStories: NextPage = () => {
   const router = useRouter();
   const userid = typeof router.query.userid === 'string' ? router.query.userid : '';
   const { data: session } = useSession();
-  const { stories, isLoading, error } = useStories(userid);
+  const { stories, isLoading } = useStories(userid);
 
 
   return (

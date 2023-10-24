@@ -11,7 +11,7 @@ const UserStories: NextPage = () => {
   const userid = typeof router.query.userid === 'string' ? router.query.userid : '';
   const { data: session } = useSession(); // Add this line
   const currentUserId = session?.user?.id ?? ''; // Add this line
-  const { stories, isLoading, error } = useStories(userid);
+  const { stories, isLoading} = useStories(userid);
 
   let title = "Your Fight Stories";
   if (currentUserId !== userid) {
