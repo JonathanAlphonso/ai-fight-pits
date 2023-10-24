@@ -25,6 +25,12 @@ import { prisma } from "~/server/db";
 
 type CreateContextOptions = {
   session: Session | null;
+  revalidateSSG?:
+    | ((
+        urlPath: string,
+        opts?: { unstable_onlyGenerated?: boolean | undefined } | undefined
+      ) => Promise<void>)
+    | null;
 };
 
 export type Context = ReturnType<typeof createInnerTRPCContext>;
@@ -39,9 +45,10 @@ export type Context = ReturnType<typeof createInnerTRPCContext>;
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-const createInnerTRPCContext = (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
+    revalidateSSG: opts.revalidateSSG,
     prisma,
   };
 };

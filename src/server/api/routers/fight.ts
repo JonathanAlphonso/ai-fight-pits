@@ -104,20 +104,19 @@ export const fightRouter = createTRPCRouter({
   .input(z.object({ userid: z.string() })) // accept userid as input
   .query(async ({ input, ctx }) => {
     const { userid } = input; // get the userid from the input
-    console.log(`User ID used to fetch fights: ${userid}`); // Add this line
-      const fights = await ctx.prisma.fight.findMany({
+    const fights = await ctx.prisma.fight.findMany({
       where: {
         createdById: userid, // use the userid to fetch the fights
       },
       include: { createdBy: true }, // Include the createdBy user
       orderBy: { time: 'desc' }, // Order by creation date in descending order
     });
-  
+
     // Get the names of the fighters and ensure createdBy.name is not null
     const fightsWithNames = fights.map(async (fight) => {
       const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
       const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
-  
+
       return { 
         ...fight, 
         fighter1Name, 
@@ -128,7 +127,6 @@ export const fightRouter = createTRPCRouter({
         },
       };
     });
-  
     return Promise.all(fightsWithNames);
   }),
   getAll: publicProcedure
