@@ -14,8 +14,8 @@ export type Story = {
   fighter1Id: number;
   fighter2Id: number;
   winnerId: number | null;
-  time: Date;
-  createdById: string; // Change this from string to User
+  time: string | Date; // Adjusted to accept both Date and string
+  createdById: string;
 };
 
 // export type DetailedStory = {

@@ -1,15 +1,15 @@
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import Head from "next/head";
-import { api } from "~/utils/api";
 import StoryFormatter from "~/components/StoryFormatter";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
+import { ssgHelper } from '~/server/api/ssgHelper';
 
-const SingleStoryPage: NextPage = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const { data: story, isLoading } = api.fight.getOne.useQuery(Number(id));
+
+const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) => {
+  const { storyData:story } = props;
+  const isLoading = false;
 
   return (
     <>
@@ -60,5 +60,47 @@ const SingleStoryPage: NextPage = () => {
     </>
   );
 };
+
+export const getStaticPaths = async () => {
+  const ssg = ssgHelper();
+  const fights = await ssg.fight.getAll.fetch();
+
+  const paths = fights.map((fight) => ({
+    params: { id: fight.id.toString() },
+  }));
+
+  return {
+    paths,
+    fallback: 'blocking',
+  };
+};
+
+export async function getStaticProps(context: GetStaticPropsContext<{ id: string }>) {
+  const ssg = ssgHelper();
+  const id = context.params?.id as string;
+
+  if (isNaN(Number(id))) {
+    throw new Error(`Invalid id: ${id}`);
+  }
+
+  let storyData = await ssg.fight.getOne.fetch(Number(id));
+
+  if (storyData.time) {
+    storyData = {
+      ...storyData,
+      // @ts-expect-error: bullshit can't serialize date but also doesn't want to convert to string
+      time: (storyData.time as unknown as Date).toISOString(),
+    };
+  }
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+      id,
+      storyData,
+    },
+    revalidate: 60,
+  };
+}
 
 export default SingleStoryPage;
