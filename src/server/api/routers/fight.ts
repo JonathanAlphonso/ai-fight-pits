@@ -101,15 +101,20 @@ export const fightRouter = createTRPCRouter({
     return { message: 'Fight deleted successfully' };
   }),
   getAllByUser: publicProcedure
-  .input(z.object({ userid: z.string() })) // accept userid as input
+  .input(z.object({ userid: z.string(), page: z.number().optional() })) // accept userid and page as input
   .query(async ({ input, ctx }) => {
-    const { userid } = input; // get the userid from the input
+    const { userid, page = 1 } = input; // get the userid and page from the input
+    const limit = 10; // or however many stories you want per page
+    const offset = (page - 1) * limit; // calculate the offset
+
     const fights = await ctx.prisma.fight.findMany({
       where: {
         createdById: userid, // use the userid to fetch the fights
       },
       include: { createdBy: true }, // Include the createdBy user
       orderBy: { time: 'desc' }, // Order by creation date in descending order
+      take: limit,
+      skip: offset,
     });
 
     // Get the names of the fighters and ensure createdBy.name is not null
@@ -130,17 +135,24 @@ export const fightRouter = createTRPCRouter({
     return Promise.all(fightsWithNames);
   }),
   getAll: publicProcedure
-  .query(async ({ ctx }) => {
+  .input(z.object({ page: z.number().optional() })) // accept page as input
+  .query(async ({ input, ctx }) => {
+    const { page = 1 } = input; // get the page from the input
+    const limit = 5; // or however many stories you want per page
+    const offset = (page - 1) * limit; // calculate the offset
+
     const fights = await ctx.prisma.fight.findMany({
       include: { createdBy: true }, // Include the createdBy user
       orderBy: { time: 'desc' }, // Order by creation date in descending order
+      take: limit,
+      skip: offset,
     });
-  
+
     // Get the names of the fighters and ensure createdBy.name is not null
     const fightsWithNames = fights.map(async (fight) => {
       const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
       const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
-  
+
       return { 
         ...fight, 
         fighter1Name, 
@@ -151,7 +163,7 @@ export const fightRouter = createTRPCRouter({
         },
       };
     });
-  
+
     return Promise.all(fightsWithNames);
   }),
   getOne: publicProcedure

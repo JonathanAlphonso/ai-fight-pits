@@ -3,14 +3,11 @@ import Head from "next/head";
 import StoryList from "~/components/StoryList";
 import { useSession } from "next-auth/react";
 import { useStories } from "~/hooks/useStories";
-import { useRouter } from 'next/router';
 
 
 const AllUserStories: NextPage = () => {
-  const router = useRouter();
-  const userid = typeof router.query.userid === 'string' ? router.query.userid : '';
   const { data: session } = useSession();
-  const { stories, isLoading } = useStories(userid);
+  const { stories, isLoading } = useStories();
 
 
   return (

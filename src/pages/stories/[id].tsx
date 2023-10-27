@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
 import { ssgHelper } from '~/server/api/ssgHelper';
+import ClipLoader from "react-spinners/ClipLoader";
 
 
 const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) => {
@@ -23,7 +24,7 @@ const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> 
       <main className="flex flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] sm:min-h-screen">
         <div className="container flex flex-col items-center justify-center gap-4 px-4 py-4 sm:max-w-2xl sm:gap-12 sm:px-4 sm:py-16">
           {isLoading ? (
-            <div className="text-lg text-white sm:text-2xl">Loading...</div>
+            <ClipLoader color={"#ffffff"} size={150} />
           ) : (
             <>
               <div className="flex flex-col text-lg text-white sm:text-2xl">
@@ -63,7 +64,7 @@ const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> 
 
 export const getStaticPaths = async () => {
   const ssg = ssgHelper();
-  const fights = await ssg.fight.getAll.fetch();
+  const fights = await ssg.fight.getAll.fetch({});
 
   const paths = fights.map((fight) => ({
     params: { id: fight.id.toString() },

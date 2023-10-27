@@ -4,6 +4,7 @@ import Head from "next/head";
 import { useState } from "react";
 import CharacterForm from "~/components/CharacterForm";
 import StoryFormatter from "~/components/StoryFormatter";
+import ClipLoader from "react-spinners/ClipLoader";
 
 type Response = {
   story: string;
@@ -43,7 +44,7 @@ const Home: NextPage = () => {
             setError={setError} // Pass setError as a prop
           />
           {isLoading ? (
-            <div className="text-left text-4xl text-white">Loading...</div>
+            <ClipLoader color={"#ffffff"} size={150} />
           ) : error ? ( // If there's an error, display it
             <div className="text-left text-4xl text-red-500">{error}</div>
           ) : response ? (

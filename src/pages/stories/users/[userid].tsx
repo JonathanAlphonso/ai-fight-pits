@@ -1,17 +1,20 @@
+import type { GetServerSideProps } from 'next';
 import { useSession } from "next-auth/react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import StoryList from "~/components/StoryList";
-import { useRouter } from 'next/router';
-
 import { useStories } from "~/hooks/useStories";
 
-const UserStories: NextPage = () => {
-  const router = useRouter();
-  const userid = typeof router.query.userid === 'string' ? router.query.userid : '';
-  const { data: session } = useSession(); // Add this line
-  const currentUserId = session?.user?.id ?? ''; // Add this line
-  const { stories, isLoading} = useStories(userid);
+type UserStoriesProps = {
+  userid: string;
+};
+
+
+const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id ?? '';
+
+  const { stories, isLoading } = useStories(userid);
 
   let title = "Your Fight Stories";
   if (currentUserId !== userid) {
@@ -42,4 +45,18 @@ const UserStories: NextPage = () => {
   );
 };
 
+
+export const getServerSideProps: GetServerSideProps<UserStoriesProps> = async (context) => {
+ 
+ 
+  const userid = context.params?.userid as string;
+  return Promise.resolve({
+    props: {
+      userid,
+    },
+  });
+};
+
 export default UserStories;
+
+
