@@ -4,19 +4,25 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import StoryList from "~/components/StoryList";
 import { useStories } from "~/hooks/useStories";
+import Loading from '~/components/LoadingScreen';
+
 
 type UserStoriesProps = {
   userid: string;
 };
 
-
 const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
   const { data: session } = useSession();
-  const currentUserId = session?.user?.id ?? '';
-
   const { stories, isLoading } = useStories(userid);
 
+  if (!session || isLoading) {
+    return <Loading />;
+  }
+
+  const currentUserId = session.user.id;
+
   let title = "Your Fight Stories";
+
   if (currentUserId !== userid) {
     const name = stories[0]?.createdBy.name || 'Unknown';
     title = `${name}'s Fight Stories`;
@@ -31,13 +37,13 @@ const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
         <div className="container flex max-w-full flex-col items-center justify-center gap-12 px-4 py-16 sm:max-w-2xl ">
-          <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
+          {!isLoading && <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
             {title}
-          </h1>
+          </h1>}
           <StoryList
             stories={stories}
             isLoading={isLoading}
-            currentUserId={session?.user?.id ?? 'Unknown'}
+            currentUserId={currentUserId}
           />
         </div>
       </main>
@@ -45,10 +51,7 @@ const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
   );
 };
 
-
 export const getServerSideProps: GetServerSideProps<UserStoriesProps> = async (context) => {
- 
- 
   const userid = context.params?.userid as string;
   return Promise.resolve({
     props: {
@@ -58,5 +61,3 @@ export const getServerSideProps: GetServerSideProps<UserStoriesProps> = async (c
 };
 
 export default UserStories;
-
-

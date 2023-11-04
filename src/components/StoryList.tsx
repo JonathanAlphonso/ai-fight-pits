@@ -7,6 +7,7 @@ import StoryFormatter from "./StoryFormatter";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import ClipLoader from "react-spinners/ClipLoader";
+import LoadingSpinner from "./LoadingSpinner";
 
 const StoryList: React.FC<StoryListProps> = ({ currentUserId }) => {
   const router = useRouter();
@@ -36,19 +37,8 @@ const StoryList: React.FC<StoryListProps> = ({ currentUserId }) => {
       next={fetchMoreData}
       hasMore={hasMore}
       loader={
-        isLoading && (
-          <div
-            style={{
-              overflow: "hidden",
-            }}
-          >
-            <ClipLoader
-              cssOverride={{ overflow: "hidden", height: 250, width: 250 }}
-              color={"#ffffff"}
-              size={250}
-            />
-          </div>
-        )
+        isLoading && 
+        <LoadingSpinner />
       }
       endMessage={
         <p className="mt-11 text-center text-xl text-white">

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { Configuration, OpenAIApi } from "openai";
 import type {CreateChatCompletionResponse} from "../../../types/types";
-
+// Testing
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -24,9 +24,9 @@ export const gptRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const prompt = `Please vividly describe a single round fight between the characters ${input.character1} and ${input.character2}. Your description should be exciting and detailed, focusing on the specific skills and attributes of the fighters. At the conclusion of the fight, clearly state the winner and provide a compelling explanation based on the implied capabilities of the two opponents.
-      At the very end you must add a seperate line with "Winner: ${input.character1}" or "Winner: ${input.character2}" or "Winner: Draw". Remember to focus on the fight itself and provide a thrilling narrative that brings the action to life. Avoid introducing your role in the response and ensure that the description remains concise and within the specified word limit of 150 words.`;
-
+      const prompt = `Given the attributes of the fighters ${input.character1} and ${input.character2}, excitingly describe a single round fight between them. Focus on their specific skills and attributes. 
+      At the conclusion of the fight, clearly state the winner based on their demonstrated capabilities in a separate line as "Winner: ${input.character1}" or "Winner: ${input.character2}" or "Winner: Draw". 
+      The description should remain within a 150-word limit.`;
       try {
         const res = await Promise.race([
           openai
