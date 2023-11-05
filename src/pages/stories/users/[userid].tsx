@@ -15,11 +15,11 @@ const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
   const { data: session } = useSession();
   const { stories, isLoading } = useStories(userid);
 
-  if (!session || isLoading) {
+  if (!userid || isLoading) {
     return <Loading />;
   }
 
-  const currentUserId = session.user.id;
+  const currentUserId = session?.user.id ?? null;
 
   let title = "Your Fight Stories";
 

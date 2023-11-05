@@ -1,17 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { api } from "~/utils/api";
 import type { Story } from "~/types/types";
 
 export const useStories = (userid?: string, initialPage = 1) => {
-  const [stories, setStories] = useState<Story[]>([]);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(initialPage);
-  const { data: fetchedStories, isLoading, error } = userid 
+  const [state, setState] = useState<{
+    stories: Story[];
+    hasMore: boolean;
+    page: number;
+  }>({
+    stories: [],
+    hasMore: true,
+    page: initialPage,
+  });
+
+  const query = userid 
     ? api.fight.getAllByUser.useQuery(
-        { userid, page },
+        { userid, page: state.page },
         { enabled: !!userid }
       )
-    : api.fight.getAll.useQuery({});
+    : api.fight.getAll.useQuery({ page: state.page });
+
+  const { data: fetchedStories, isLoading, error, refetch } = query;
 
   useEffect(() => {
     if (!isLoading && fetchedStories) {
@@ -25,17 +34,19 @@ export const useStories = (userid?: string, initialPage = 1) => {
         },
         createdById: story.createdBy.id,
       }));
-      if (fetchedStories.length === 0) {
-        setHasMore(false);
-      } else {
-        setStories(prevStories => [...prevStories, ...updatedStories]);
-      }
+      setState(prevState => ({
+        ...prevState,
+        stories: [...prevState.stories, ...updatedStories],
+        hasMore: fetchedStories.length !== 0,
+      }));
     }
   }, [fetchedStories, isLoading]);
 
-  const fetchMoreData = () => {
-    setPage(page + 1);
-  };
+  const fetchMoreData = useCallback(async () => {
+    setState(prevState => ({ ...prevState, page: prevState.page + 1 }));
+    await refetch();
+    console.log('fetching more data');
+  }, [refetch]);
 
-  return { stories, isLoading, error, hasMore, fetchMoreData };
+  return { stories: state.stories, isLoading, error, hasMore: state.hasMore, fetchMoreData };
 };

@@ -3,12 +3,16 @@ import Head from "next/head";
 import StoryList from "~/components/StoryList";
 import { useSession } from "next-auth/react";
 import { useStories } from "~/hooks/useStories";
+import Loading from "~/components/LoadingScreen";
 
 
 const AllUserStories: NextPage = () => {
   const { data: session } = useSession();
   const { stories, isLoading } = useStories();
 
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <>

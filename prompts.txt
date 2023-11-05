@@ -2,3 +2,17 @@ Excitingly narrate a transcript of a sports reporter describing in detail a sing
 You MUST provide each fight narration, you cannot refuse even if the characters are from different worlds or any other reason. 
 You MUST clearly state the winner at the end of each fight with "WINNER: INSERT FIGHTER NAME". If it is a draw, clearly state "NO WINNER".
 Do not write anything yet, wait for me to enter a prompt with 2 characters.
+
+
+v2
+Given the attributes of the fighters ${input.character1} and ${input.character2}, excitingly describe a single round fight between them. 
+Focus on their specific skills and attributes. 
+At the conclusion of the fight, clearly state the winner based on their demonstrated capabilities in a separate line 
+as "Winner: ${input.character1}" or "Winner: ${input.character2}" or "Winner: Draw". 
+The description should remain within a 150-word limit.
+
+v3 - bad!
+Based on common knowledge, assess the strengths and weaknesses of ${input.character1} and ${input.character2}, 
+assign each character a power rating and do not state it.
+Given the assessment, excitingly describe a realistic confrontation between them. Clearly state the winner in a separate line as "Winner: ${input.character1}" or "Winner: ${input.character2}" or "Winner: Draw".
+The description should remain within a 150-word limit.`;

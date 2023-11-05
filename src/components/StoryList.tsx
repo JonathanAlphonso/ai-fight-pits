@@ -6,40 +6,37 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import StoryFormatter from "./StoryFormatter";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import ClipLoader from "react-spinners/ClipLoader";
 import LoadingSpinner from "./LoadingSpinner";
 
 const StoryList: React.FC<StoryListProps> = ({ currentUserId }) => {
   const router = useRouter();
   const userid =
     typeof router.query.userid === "string" ? router.query.userid : undefined;
-  const { stories, isLoading, hasMore, fetchMoreData } =
+  const { stories: fetchedStories, isLoading, hasMore, fetchMoreData } =
     useStories(userid);
 
-  const [localStories, setLocalStories] = useState<Story[]>(stories);
-  const deleteFightMutation = api.fight.delete.useMutation();
+  const [stories, setStories] = useState<Story[]>(fetchedStories);
 
   useEffect(() => {
-    setLocalStories(stories);
-  }, [stories]);
+    setStories(fetchedStories);
+  }, [fetchedStories]);
+
+  const deleteFightMutation = api.fight.delete.useMutation();
 
   const handleDelete = (id: number) => {
     deleteFightMutation.mutate(id, {
       onSuccess: () => {
-        setLocalStories(localStories.filter((story) => story.id !== id));
+        setStories(stories.filter((story) => story.id !== id));
       },
     });
   };
 
   return (
     <InfiniteScroll
-      dataLength={localStories.length}
+      dataLength={stories.length}
       next={fetchMoreData}
       hasMore={hasMore}
-      loader={
-        isLoading && 
-        <LoadingSpinner />
-      }
+      loader={isLoading && <LoadingSpinner />}
       endMessage={
         <p className="mt-11 text-center text-xl text-white">
           <b>
@@ -52,8 +49,8 @@ const StoryList: React.FC<StoryListProps> = ({ currentUserId }) => {
         </p>
       }
     >
-      {localStories.length > 0
-        ? localStories.map((story: Story, index: number) => (
+      {stories.length > 0
+        ? stories.map((story: Story, index: number) => (
             <div key={index} className="story-container mb-4">
               <StoryFormatter
                 text={story.fightLog}
