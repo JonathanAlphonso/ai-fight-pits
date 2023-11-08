@@ -1,42 +1,54 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Story, StoryListProps } from "~/types/types";
-import { useStories } from "~/hooks/useStories";
-import InfiniteScroll from "react-infinite-scroll-component";
 import StoryFormatter from "./StoryFormatter";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
-import LoadingSpinner from "./LoadingSpinner";
+import InfiniteScroll from "react-infinite-scroll-component";
+import ClipLoader from "react-spinners/ClipLoader";
 
-const StoryList: React.FC<StoryListProps> = ({ currentUserId }) => {
-  const router = useRouter();
-  const userid =
-    typeof router.query.userid === "string" ? router.query.userid : undefined;
-  const { stories: fetchedStories, isLoading, hasMore, fetchMoreData } =
-    useStories(userid);
+type ExtendedStoryListProps = StoryListProps & {
+  stories: Story[];
+  isLoading: boolean;
+  hasMore: boolean;
+  fetchMoreData: () => void;
+};
 
-  const [stories, setStories] = useState<Story[]>(fetchedStories);
+const StoryList: React.FC<ExtendedStoryListProps> = ({ stories, isLoading, hasMore, fetchMoreData, currentUserId }) => {
+  const [localStories, setLocalStories] = useState<Story[]>(stories);
+  const deleteFightMutation = api.fight.delete.useMutation();
 
   useEffect(() => {
-    setStories(fetchedStories);
-  }, [fetchedStories]);
-
-  const deleteFightMutation = api.fight.delete.useMutation();
+    setLocalStories(stories);
+  }, [stories]);
 
   const handleDelete = (id: number) => {
     deleteFightMutation.mutate(id, {
       onSuccess: () => {
-        setStories(stories.filter((story) => story.id !== id));
+        setLocalStories(localStories.filter((story) => story.id !== id));
       },
     });
   };
 
   return (
     <InfiniteScroll
-      dataLength={stories.length}
+      dataLength={localStories.length}
       next={fetchMoreData}
       hasMore={hasMore}
-      loader={isLoading && <LoadingSpinner />}
+      loader={
+        isLoading && (
+          <div
+            style={{
+              overflow: "hidden",
+            }}
+          >
+            <ClipLoader
+              cssOverride={{ overflow: "hidden", height: 250, width: 250 }}
+              color={"#ffffff"}
+              size={250}
+            />
+          </div>
+        )
+      }
       endMessage={
         <p className="mt-11 text-center text-xl text-white">
           <b>
@@ -49,8 +61,8 @@ const StoryList: React.FC<StoryListProps> = ({ currentUserId }) => {
         </p>
       }
     >
-      {stories.length > 0
-        ? stories.map((story: Story, index: number) => (
+      {localStories.length > 0
+        ? localStories.map((story: Story, index: number) => (
             <div key={index} className="story-container mb-4">
               <StoryFormatter
                 text={story.fightLog}

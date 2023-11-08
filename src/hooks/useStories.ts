@@ -1,27 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { api } from "~/utils/api";
 import type { Story } from "~/types/types";
 
 export const useStories = (userid?: string, initialPage = 1) => {
-  const [state, setState] = useState<{
-    stories: Story[];
-    hasMore: boolean;
-    page: number;
-  }>({
-    stories: [],
-    hasMore: true,
-    page: initialPage,
-  });
-
-  const query = userid 
+  const [stories, setStories] = useState<Story[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(initialPage);
+  const { data: fetchedStories, isLoading, error } = userid 
     ? api.fight.getAllByUser.useQuery(
-        { userid, page: state.page },
+        { userid, page },
         { enabled: !!userid }
       )
-    : api.fight.getAll.useQuery({ page: state.page });
-
-  const { data: fetchedStories, isLoading, error, refetch } = query;
-
+    : api.fight.getAll.useQuery({page});
+console.log('useStories hook has loaded!')
   useEffect(() => {
     if (!isLoading && fetchedStories) {
       const updatedStories = fetchedStories.map((story) => ({
@@ -34,19 +25,17 @@ export const useStories = (userid?: string, initialPage = 1) => {
         },
         createdById: story.createdBy.id,
       }));
-      setState(prevState => ({
-        ...prevState,
-        stories: [...prevState.stories, ...updatedStories],
-        hasMore: fetchedStories.length !== 0,
-      }));
+      if (fetchedStories.length === 0) {
+        setHasMore(false);
+      } else {
+        setStories(prevStories => [...prevStories, ...updatedStories]);
+      }
     }
   }, [fetchedStories, isLoading]);
 
-  const fetchMoreData = useCallback(async () => {
-    setState(prevState => ({ ...prevState, page: prevState.page + 1 }));
-    await refetch();
-    console.log('fetching more data');
-  }, [refetch]);
+  const fetchMoreData = () => {
+    setPage(page + 1);
+  };
 
-  return { stories: state.stories, isLoading, error, hasMore: state.hasMore, fetchMoreData };
+  return { stories, isLoading, error, hasMore, page, fetchMoreData };
 };
