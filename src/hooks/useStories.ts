@@ -11,8 +11,8 @@ export const useStories = (userid?: string, initialPage = 1) => {
         { userid, page },
         { enabled: !!userid }
       )
-    : api.fight.getAll.useQuery({});
-
+    : api.fight.getAll.useQuery({page});
+console.log('useStories hook has loaded!')
   useEffect(() => {
     if (!isLoading && fetchedStories) {
       const updatedStories = fetchedStories.map((story) => ({
@@ -37,5 +37,5 @@ export const useStories = (userid?: string, initialPage = 1) => {
     setPage(page + 1);
   };
 
-  return { stories, isLoading, error, hasMore, fetchMoreData };
+  return { stories, isLoading, error, hasMore, page, fetchMoreData };
 };

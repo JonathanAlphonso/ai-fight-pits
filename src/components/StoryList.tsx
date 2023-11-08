@@ -1,20 +1,19 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Story, StoryListProps } from "~/types/types";
-import { useStories } from "~/hooks/useStories";
-import InfiniteScroll from "react-infinite-scroll-component";
 import StoryFormatter from "./StoryFormatter";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
+import InfiniteScroll from "react-infinite-scroll-component";
 import ClipLoader from "react-spinners/ClipLoader";
 
-const StoryList: React.FC<StoryListProps> = ({ currentUserId }) => {
-  const router = useRouter();
-  const userid =
-    typeof router.query.userid === "string" ? router.query.userid : undefined;
-  const { stories, isLoading, hasMore, fetchMoreData } =
-    useStories(userid);
+type ExtendedStoryListProps = StoryListProps & {
+  stories: Story[];
+  isLoading: boolean;
+  hasMore: boolean;
+  fetchMoreData: () => void;
+};
 
+const StoryList: React.FC<ExtendedStoryListProps> = ({ stories, isLoading, hasMore, fetchMoreData, currentUserId }) => {
   const [localStories, setLocalStories] = useState<Story[]>(stories);
   const deleteFightMutation = api.fight.delete.useMutation();
 

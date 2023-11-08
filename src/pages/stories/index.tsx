@@ -1,13 +1,23 @@
+import { useSession } from "next-auth/react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import StoryList from "~/components/StoryList";
-import { useSession } from "next-auth/react";
 import { useStories } from "~/hooks/useStories";
+import LoadingScreen from "~/components/LoadingScreen";
 
 
 const AllUserStories: NextPage = () => {
   const { data: session } = useSession();
-  const { stories, isLoading } = useStories();
+  
+
+  const { stories, isLoading, error, hasMore, page, fetchMoreData } =
+    useStories();
+
+  if (error) return (<div>Error: {error.message}</div>);
+  //Only show loading screen if it's the first page
+  if (isLoading && page===1) return (<LoadingScreen/>);
+
+ 
 
 
   return (
@@ -26,7 +36,9 @@ const AllUserStories: NextPage = () => {
           <StoryList
             stories={stories}
             isLoading={isLoading}
-            currentUserId={session?.user?.id ?? null}
+            hasMore={hasMore}
+            fetchMoreData={fetchMoreData}
+            currentUserId={session?.user?.id ?? "Unknown"}
           />
         </div>
       </main>

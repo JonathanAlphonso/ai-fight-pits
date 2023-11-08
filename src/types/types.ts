@@ -43,6 +43,10 @@ export type StoryFormatterProps = {
   fighter2Name: string;
 };
 
+export type UserStoriesProps = {
+  userid: string;
+};
+
 export type Response = {
   story: string;
   fighter1Name: string;

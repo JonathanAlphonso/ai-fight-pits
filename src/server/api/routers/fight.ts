@@ -104,7 +104,7 @@ export const fightRouter = createTRPCRouter({
   .input(z.object({ userid: z.string(), page: z.number().optional() })) // accept userid and page as input
   .query(async ({ input, ctx }) => {
     const { userid, page = 1 } = input; // get the userid and page from the input
-    const limit = 10; // or however many stories you want per page
+    const limit = 5; // or however many stories you want per page
     const offset = (page - 1) * limit; // calculate the offset
 
     const fights = await ctx.prisma.fight.findMany({
