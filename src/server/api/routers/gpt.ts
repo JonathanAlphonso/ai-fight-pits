@@ -23,6 +23,13 @@ export const gptRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
+      let { character1, character2 } = input;
+
+      // 50% chance to swap character1 and character2
+      if (Math.random() < 0.5) {
+        [character1, character2] = [character2, character1];
+      }
+
       const prompt = `
       Given the attributes of the fighters ${input.character1} and ${input.character2}, excitingly describe a single round fight between them. 
       Focus on their realistic and commonly known skills and attributes. 
