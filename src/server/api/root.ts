@@ -12,6 +12,7 @@ export const appRouter = createTRPCRouter({
   example: exampleRouter,
   gpt: gptRouter,
   fight: fightRouter,
+  like: likeRouter,
 });
 
 // export type definition of API

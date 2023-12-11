@@ -22,6 +22,7 @@ model User {
   //not related to Next Auth below
   currency      Int       @default(0)
   fights    Fight[]   // Fights created by the user
+  likes     Like[]
 }
 
 model Account {
@@ -60,9 +61,11 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Below are the models not related to Next Auth
+
 model Fighter {
   id          Int     @id @default(autoincrement())
-  name        String  @unique
+  name        String
   description String
   powerRating Int     // Overall power rating
 }
@@ -76,6 +79,7 @@ model Fight {
   time        DateTime  @default(now())
   createdById String  
   createdBy   User      @relation(fields: [createdById], references: [id])
+  likes       Like[]
   @@index([createdById])
 }
 
@@ -89,4 +93,14 @@ model Bet {
   fightId   Int
   user      User     @relation(fields: [userId], references: [id])
   @@index([userId])
+}
+
+model Like {
+  userId    String
+  fightId   Int
+  user      User     @relation(fields: [userId], references: [id])
+  fight     Fight    @relation(fields: [fightId], references: [id])
+  @@index([userId])
+  @@index([fightId])
+  @@id([userId, fightId])
 }

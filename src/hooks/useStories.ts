@@ -32,7 +32,7 @@ export const useStories = (userid?: string, initialPage = 1) => {
       }));
 
       if (fetchedStories.length === 0) {
-        setHasMore(false); // All stories have been fetched
+        setHasMore(false); /// All stories have been fetched
       } else {
         setStories((prevStories) => [
           // Spread the existing stories
