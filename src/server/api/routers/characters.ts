@@ -8,7 +8,6 @@ export const fightRouter = createTRPCRouter({
         fightLog: z.string(), // Validate according to your JSON structure
         fighter1Id: z.number(),
         fighter2Id: z.number(),
-        winnerId: z.number().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -17,7 +16,6 @@ export const fightRouter = createTRPCRouter({
           fightLog: input.fightLog,
           fighter1Id: input.fighter1Id,
           fighter2Id: input.fighter2Id,
-          winnerId: input.winnerId,
           createdById: ctx.session.user.id, // Assigning the user's ID to createdById
         },
       });

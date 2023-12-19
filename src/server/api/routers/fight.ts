@@ -70,7 +70,7 @@ export const fightRouter = createTRPCRouter({
         fightLog: input.fightLog,
         fighter1Id: fighter1.id,
         fighter2Id: fighter2.id,
-        winnerId: input.winnerName ? (await ctx.prisma.fighter.findUnique({ where: { name: input.winnerName } }))?.id : null,
+        fightWinner: input.winnerName ? input.winnerName:  "Draw",
         createdById: ctx.session.user.id, // Assigning the user's ID to createdById
       },
     });

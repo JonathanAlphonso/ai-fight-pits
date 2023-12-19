@@ -2,6 +2,7 @@ import { fightRouter } from "./routers/fight";
 import { exampleRouter } from "~/server/api/routers/example";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { gptRouter } from "~/server/api/routers/gpt";
+import { likeRouter } from "~/server/api/routers/like";
 
 /**
  * This is the primary router for your server.

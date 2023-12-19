@@ -13,7 +13,8 @@ export type Story = {
   fightLog: string;
   fighter1Id: number;
   fighter2Id: number;
-  winnerId: number | null;
+  //winnerId: number | null;
+  fightWinner: string | null;
   time: string | Date; // Adjusted to accept both Date and string
   createdById: string;
 };
