@@ -18,10 +18,7 @@ function toTitleCase(str: string): string {
   return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-
-
 export const fightRouter = createTRPCRouter({
-  
   create: protectedProcedure
   .input(
     z.object({
@@ -122,6 +119,11 @@ export const fightRouter = createTRPCRouter({
       const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
       const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
 
+      // Get the number of likes
+      const likesCount = await ctx.prisma.like.count({
+        where: { fightId: fight.id },
+      });
+
       return { 
         ...fight, 
         fighter1Name, 
@@ -130,8 +132,10 @@ export const fightRouter = createTRPCRouter({
           ...fight.createdBy,
           name: fight.createdBy.name || 'Unknown',
         },
+        likesCount, // Return the number of likes
       };
     });
+
     return Promise.all(fightsWithNames);
   }),
   getAll: publicProcedure
@@ -153,6 +157,11 @@ export const fightRouter = createTRPCRouter({
       const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
       const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
 
+      // Get the number of likes
+      const likesCount = await ctx.prisma.like.count({
+        where: { fightId: fight.id },
+      });
+
       return { 
         ...fight, 
         fighter1Name, 
@@ -161,6 +170,7 @@ export const fightRouter = createTRPCRouter({
           ...fight.createdBy,
           name: fight.createdBy.name || 'Unknown',
         },
+        likesCount, // Return the number of likes
       };
     });
 
@@ -181,12 +191,18 @@ export const fightRouter = createTRPCRouter({
     const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
     const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
 
+    // Get the number of likes
+    const likesCount = await ctx.prisma.like.count({
+      where: { fightId: fight.id },
+    });
+
     return { 
       ...fight, 
       fighter1Name, 
       fighter2Name,
       createdBy: fight.createdBy, // Return the createdBy user
       id: fight.id, // Return the id of the fight
+      likesCount, // Return the number of likes
     };
   }),
 });

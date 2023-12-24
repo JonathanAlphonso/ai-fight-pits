@@ -1,4 +1,6 @@
 import React from "react";
+import { VscHeart, VscHeartFilled } from "react-icons/vsc";
+import { useState } from "react";
 
 interface StoryFormatterProps {
   text: string;
@@ -19,6 +21,12 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({ text,fighter1Name,fight
 
   const filteredParagraphs = getFilteredParagraphs(interpretedText || "");
 
+  const [liked, setLiked] = useState(false);
+
+  const handleLikeClick = () => {
+    setLiked(!liked);
+  };
+
   return (
     <div className="flex max-w-3xl flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20">
       <h3 className="text-left text-4xl text-white">
@@ -29,6 +37,9 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({ text,fighter1Name,fight
           {paragraph}
         </p>
       ))}
+      <button onClick={handleLikeClick} className="text-red-500">
+        {liked ? <VscHeartFilled /> : <VscHeart />}
+      </button>
     </div>
   );
 };
