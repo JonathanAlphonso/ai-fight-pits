@@ -2,12 +2,8 @@
 import React, { useState } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
-
-interface Response {
-  story: string;
-  fighter1Name: string;
-  fighter2Name: string;
-}
+import type { Response } from '~/types/types';
+import { TRPCClientError } from '@trpc/client';
 
 interface FormProps {
   setResponse: React.Dispatch<React.SetStateAction<Response | null>>;
@@ -20,7 +16,9 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
   const [character2, setCharacter2] = useState<string>("");
   const [characterError, setCharacterError] = useState<string | null>(null);
 
-  const createFight = api.fight.create.useMutation();
+  const createFight = api.fight.create.useMutation({
+    retry: 0, // disable retries
+  });
   const { data: sessionData } = useSession();
 
   const gptQuery = api.gpt.getGPT3Response.useQuery(
@@ -33,24 +31,30 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
       onSuccess: (newFight) => {
         if (!newFight || newFight.length < 200) {
           setError("Fighters not permitted. Try different fighters.");
+          console.log("Fighters not permitted. Try different fighters.");
           return;
         }
-        setResponse({
-          story: newFight || "No response received from API.",
-          fighter1Name: character1,
-          fighter2Name: character2,
-        });
+      
         if (sessionData?.user) {
-          const postData = () => {
-            createFight.mutate({
-              fightLog: JSON.stringify(newFight),
-              // fighter1Id: 1,
-              // fighter2Id: 2,
-              fighter1Name: character1,
-              fighter2Name: character2,
-            });
-          };
-          postData();
+          createFight.mutate({
+            fightLog: JSON.stringify(newFight),
+            fighter1Name: character1,
+            fighter2Name: character2,
+          }, {
+            onSuccess: (createdFight) => {
+              setResponse({
+                story: newFight,
+                fighter1Name: character1,
+                fighter2Name: character2,
+                likesCount: 0, // default value
+                storyId: createdFight.id, // use the id from the created fight
+                hasUserLiked: false, // default value
+              });
+            },
+            onError: (error) => {
+              setError(error instanceof Error ? error.message : "An unknown error occurred.");
+            }
+          });
         } else {
           console.log("No user logged in, not posting fight to database.");
         }
@@ -74,7 +78,11 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
       try {
         await gptQuery.refetch();
       } catch (error: unknown) {
-        setError(error instanceof Error ? error.message : "An unknown error occurred.");
+        if (error instanceof TRPCClientError) {
+          setCharacterError(error.message);
+        } else {
+          setCharacterError("An unknown error occurred.");
+        }
       }
       setIsLoading(false);
     })();

@@ -17,6 +17,8 @@ const StoryList: React.FC<ExtendedStoryListProps> = ({ stories, isLoading, hasMo
   const [localStories, setLocalStories] = useState<Story[]>(stories);
   const deleteFightMutation = api.fight.delete.useMutation();
 
+  console.log(localStories);
+
   useEffect(() => {
     setLocalStories(stories);
   }, [stories]);
@@ -68,6 +70,9 @@ const StoryList: React.FC<ExtendedStoryListProps> = ({ stories, isLoading, hasMo
                 text={story.fightLog}
                 fighter1Name={story.fighter1Name || ""}
                 fighter2Name={story.fighter2Name || ""}
+                likesCount={story.likesCount || 0}
+                storyId={story.id}
+                hasUserLiked={story?.hasUserLiked ?? false}
               />
               {story?.createdBy.id === currentUserId && (
                 <>

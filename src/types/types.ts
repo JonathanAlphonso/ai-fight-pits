@@ -17,7 +17,11 @@ export type Story = {
   fightWinner: string | null;
   time: string | Date; // Adjusted to accept both Date and string
   createdById: string;
+  likesCount: number;
+  hasUserLiked: boolean;
 };
+
+
 
 // export type DetailedStory = {
 //   fighter1Name: string | null;
@@ -48,10 +52,14 @@ export type UserStoriesProps = {
   userid: string;
 };
 
+// src/types/types.ts
 export type Response = {
   story: string;
   fighter1Name: string;
   fighter2Name: string;
+  likesCount: number;
+  storyId: number;
+  hasUserLiked: boolean;
 };
 
 export type CreateChatCompletionResponse = {

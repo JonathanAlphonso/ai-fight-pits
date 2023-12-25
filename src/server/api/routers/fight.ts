@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, protectedProcedure,publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 import type { Context } from "~/server/api/trpc";
 
 async function getFighterNameById(ctx: Context, id: number): Promise<string> {
@@ -124,6 +124,11 @@ export const fightRouter = createTRPCRouter({
         where: { fightId: fight.id },
       });
 
+      // Check if the user has liked the fight
+      const hasUserLiked = ctx.session && ctx.session.user ? await ctx.prisma.like.findUnique({
+        where: { userId_fightId: { userId: ctx.session.user.id, fightId: fight.id } },
+      }) != null : false;
+
       return { 
         ...fight, 
         fighter1Name, 
@@ -133,6 +138,7 @@ export const fightRouter = createTRPCRouter({
           name: fight.createdBy.name || 'Unknown',
         },
         likesCount, // Return the number of likes
+        hasUserLiked, // Return whether the user has liked the fight
       };
     });
 
@@ -162,6 +168,11 @@ export const fightRouter = createTRPCRouter({
         where: { fightId: fight.id },
       });
 
+      // Check if the user has liked the fight
+      const hasUserLiked = ctx.session && ctx.session.user ? await ctx.prisma.like.findUnique({
+        where: { userId_fightId: { userId: ctx.session.user.id, fightId: fight.id } },
+      }) != null : false;
+
       return { 
         ...fight, 
         fighter1Name, 
@@ -171,6 +182,7 @@ export const fightRouter = createTRPCRouter({
           name: fight.createdBy.name || 'Unknown',
         },
         likesCount, // Return the number of likes
+        hasUserLiked, // Return whether the user has liked the fight
       };
     });
 
@@ -196,6 +208,11 @@ export const fightRouter = createTRPCRouter({
       where: { fightId: fight.id },
     });
 
+    // Check if the user has liked the fight
+    const hasUserLiked = ctx.session && ctx.session.user ? await ctx.prisma.like.findUnique({
+      where: { userId_fightId: { userId: ctx.session.user.id, fightId: fight.id } },
+    }) != null : false;
+
     return { 
       ...fight, 
       fighter1Name, 
@@ -203,6 +220,7 @@ export const fightRouter = createTRPCRouter({
       createdBy: fight.createdBy, // Return the createdBy user
       id: fight.id, // Return the id of the fight
       likesCount, // Return the number of likes
+      hasUserLiked, // Return whether the user has liked the fight
     };
   }),
 });

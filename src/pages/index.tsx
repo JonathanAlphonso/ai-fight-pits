@@ -5,12 +5,7 @@ import { useState } from "react";
 import CharacterForm from "~/components/CharacterForm";
 import StoryFormatter from "~/components/StoryFormatter";
 import ClipLoader from "react-spinners/ClipLoader";
-
-type Response = {
-  story: string;
-  fighter1Name: string;
-  fighter2Name: string;
-};
+import type { Response } from '~/types/types';
 
 const Home: NextPage = () => {
   const [response, setResponse] = useState<Response | null>(null);
@@ -52,6 +47,9 @@ const Home: NextPage = () => {
               text={response.story}
               fighter1Name={response.fighter1Name}
               fighter2Name={response.fighter2Name}
+              likesCount={response.likesCount}
+              storyId={response.storyId}
+              hasUserLiked={response.hasUserLiked}
             />
           ) : null}
         </div>

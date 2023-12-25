@@ -53,6 +53,9 @@ const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> 
                 text={story?.fightLog || ""}
                 fighter1Name={story?.fighter1Name || ""}
                 fighter2Name={story?.fighter2Name || ""}
+                likesCount={story?.likesCount || 0}
+                storyId={story.id}
+                hasUserLiked={story?.hasUserLiked ?? false}
               />
             </>
           )}
