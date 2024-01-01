@@ -3,6 +3,7 @@ import { exampleRouter } from "~/server/api/routers/example";
 import { createTRPCRouter } from "~/server/api/trpc";
 import { gptRouter } from "~/server/api/routers/gpt";
 import { likeRouter } from "~/server/api/routers/like";
+import { userRouter } from "~/server/api/routers/user";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   gpt: gptRouter,
   fight: fightRouter,
   like: likeRouter,
+  users: userRouter,
 });
 
 // export type definition of API

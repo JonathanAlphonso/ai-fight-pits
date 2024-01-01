@@ -14,6 +14,8 @@ const NavBar = () => {
 
   const authPages = session ? [
     { name: 'Your Stories', path: `/stories/users/${session.user.id}` },
+    { name: 'Profile', path: '/users/profile' },
+
   ] : []
 
   return (
