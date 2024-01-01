@@ -2,7 +2,6 @@
 
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import type { Context } from "~/server/api/trpc";
 
 export const likeRouter = createTRPCRouter({
   toggleLike: protectedProcedure
