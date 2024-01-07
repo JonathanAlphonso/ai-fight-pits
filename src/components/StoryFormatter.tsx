@@ -48,12 +48,22 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
   const { data: session } = useSession();
 
   const handleLikeClick = () => {
-    if (!session) {
-      return;
-    }
+    if (!session) return;
+    // Optimistically update the UI
     setLiked(!liked);
     setDisplayedLikes(liked ? displayedLikes - 1 : displayedLikes + 1);
-    toggleLikeMutation.mutate({ id: storyId });
+    toggleLikeMutation.mutate(
+      { id: storyId },
+      {
+        onError: (error) => {
+          // Handle the error here
+          console.error('Error toggling like:', error);
+          // Revert the optimistic UI update
+          setLiked(!liked);
+          setDisplayedLikes(liked ? displayedLikes - 1 : displayedLikes + 1);
+        },
+      }
+    );
   };
 
   return (

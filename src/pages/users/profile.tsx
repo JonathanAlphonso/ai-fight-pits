@@ -1,6 +1,5 @@
 // src/pages/users/profile.tsx
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 import Head from "next/head";
@@ -8,7 +7,6 @@ import Head from "next/head";
 export default function ProfilePage() {
   const [name, setName] = useState("Loading...");
   const updateNameMutation = api.users.updateName.useMutation();
-  const router = useRouter();
   const { data: session } = useSession();
 
   useEffect(() => {

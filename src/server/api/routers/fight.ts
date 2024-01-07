@@ -125,7 +125,7 @@ export const fightRouter = createTRPCRouter({
       });
 
       // Check if the user has liked the fight
-      const hasUserLiked = ctx.session && ctx.session.user ? await ctx.prisma.like.findUnique({
+      const hasUserLiked = ctx.session && ctx?.session.user ? await ctx.prisma.like.findUnique({
         where: { userId_fightId: { userId: ctx.session.user.id, fightId: fight.id } },
       }) != null : false;
 
@@ -167,7 +167,7 @@ export const fightRouter = createTRPCRouter({
       const likesCount = await ctx.prisma.like.count({
         where: { fightId: fight.id },
       });
-
+      console.log("current user id is: ", ctx.session?.user.id);
       // Check if the user has liked the fight
       const hasUserLiked = ctx.session && ctx.session.user ? await ctx.prisma.like.findUnique({
         where: { userId_fightId: { userId: ctx.session.user.id, fightId: fight.id } },
@@ -189,8 +189,9 @@ export const fightRouter = createTRPCRouter({
     return Promise.all(fightsWithNames);
   }),
   getOne: publicProcedure
-  .input(z.number())
-  .query(async ({ input: fightId, ctx }) => {
+  .input(z.object({ userId: z.string(), fightId: z.number().optional() }))
+  .query(async ({ input, ctx }) => {
+    const { userId,fightId } = input;
     const fight = await ctx.prisma.fight.findUnique({
       where: { id: fightId },
       include: { createdBy: true }, // Include the createdBy user
@@ -207,10 +208,9 @@ export const fightRouter = createTRPCRouter({
     const likesCount = await ctx.prisma.like.count({
       where: { fightId: fight.id },
     });
-
     // Check if the user has liked the fight
-    const hasUserLiked = ctx.session && ctx.session.user ? await ctx.prisma.like.findUnique({
-      where: { userId_fightId: { userId: ctx.session.user.id, fightId: fight.id } },
+    const hasUserLiked = userId ? await ctx.prisma.like.findUnique({
+      where: { userId_fightId: { userId: userId, fightId: fight.id } },
     }) != null : false;
 
     return { 

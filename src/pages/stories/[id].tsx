@@ -3,21 +3,34 @@ import Head from "next/head";
 import StoryFormatter from "~/components/StoryFormatter";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
-import type { GetStaticPropsContext, InferGetStaticPropsType } from 'next';
+import { getSession } from "next-auth/react";
+import type { GetServerSideProps } from 'next';
 import { ssgHelper } from '~/server/api/ssgHelper';
 import ClipLoader from "react-spinners/ClipLoader";
 
+type StoryPageProps = {
+  storyData: {
+    id: number;
+    fighter1Name: string;
+    fighter2Name: string;
+    fightLog: string;
+    likesCount: number;
+    hasUserLiked: boolean;
+    time: string;
+    createdBy: {
+      id: string;
+      name: string;
+    };
+  };
+};
 
-const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = (props) => {
-  const { storyData:story } = props;
+const SingleStoryPage: NextPage<StoryPageProps> = ({ storyData: story }) => {
   const isLoading = false;
 
   return (
     <>
       <Head>
-        <title>{`${story?.fighter1Name || "Unknown"} vs ${
-          story?.fighter2Name || "Unknown"
-        }`}</title>
+        <title>{`${story?.fighter1Name || "Unknown"} vs ${story?.fighter2Name || "Unknown"}`}</title>
         <meta name="description" content="Fight story" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -42,9 +55,7 @@ const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> 
                 <div className="mt-2 sm:mt-0">
                   <p>
                     {story?.time &&
-                      `Created ${formatDistanceToNow(
-                        new Date(story.time)
-                      )} ago`}
+                      `Created ${formatDistanceToNow(new Date(story.time))} ago`}
                   </p>
                 </div>
               </div>
@@ -65,29 +76,18 @@ const SingleStoryPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> 
   );
 };
 
-export const getStaticPaths = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const session = await getSession({ req: context.req });
   const ssg = ssgHelper();
-  const fights = await ssg.fight.getAll.fetch({});
+  const id = context.params?.id;
 
-  const paths = fights.map((fight) => ({
-    params: { id: fight.id.toString() },
-  }));
-
-  return {
-    paths,
-    fallback: 'blocking',
-  };
-};
-
-export async function getStaticProps(context: GetStaticPropsContext<{ id: string }>) {
-  const ssg = ssgHelper();
-  const id = context.params?.id as string;
-
-  if (isNaN(Number(id))) {
-    throw new Error(`Invalid id: ${id}`);
+  if (!id || isNaN(Number(id))) {
+    return {
+      notFound: true,
+    };
   }
 
-  let storyData = await ssg.fight.getOne.fetch(Number(id));
+  let storyData = await ssg.fight.getOne.fetch({ userId: session?.user.id ||'', fightId: Number(id) });
 
   if (storyData.time) {
     storyData = {
@@ -99,12 +99,10 @@ export async function getStaticProps(context: GetStaticPropsContext<{ id: string
 
   return {
     props: {
-      trpcState: ssg.dehydrate(),
-      id,
+      session,
       storyData,
     },
-    revalidate: 60,
   };
-}
+};
 
 export default SingleStoryPage;
