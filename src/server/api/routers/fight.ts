@@ -174,7 +174,7 @@ export const fightRouter = createTRPCRouter({
       }) != null : false;
 
       return { 
-        ...fight, 
+        ...fight,
         fighter1Name, 
         fighter2Name,
         createdBy: {
@@ -222,5 +222,17 @@ export const fightRouter = createTRPCRouter({
       likesCount, // Return the number of likes
       hasUserLiked, // Return whether the user has liked the fight
     };
+  }),
+  addView: publicProcedure
+  .input(z.number()) // accept fightId as input
+  .mutation(async ({ input: fightId, ctx }) => {
+    // Create a new view record
+    await ctx.prisma.view.create({
+      data: {
+        fightId: fightId,
+      },
+    });
+
+    return { message: 'View added successfully' };
   }),
 });

@@ -4,8 +4,8 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
@@ -20,9 +20,9 @@ model User {
   bets          Bet[]
 
   //not related to Next Auth below
-  currency      Int       @default(0)
-  fights    Fight[]   // Fights created by the user
-  likes     Like[]
+  currency Int     @default(0)
+  fights   Fight[] // Fights created by the user
+  likes    Like[]
 }
 
 model Account {
@@ -50,6 +50,7 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
@@ -64,26 +65,27 @@ model VerificationToken {
 // Below are the models not related to Next Auth
 
 model Fighter {
-  id          Int     @id @default(autoincrement())
+  id          Int    @id @default(autoincrement())
   name        String
   description String
-  powerRating Int     // Overall power rating
+  powerRating Int // Overall power rating
 }
 
 model Fight {
-  id          Int       @id @default(autoincrement())
-  fightLog    String    @db.Text
+  id          Int      @id @default(autoincrement())
+  fightLog    String   @db.Text
   fighter1Id  Int
   fighter2Id  Int
   // winnerId    Int?
-  fightWinner String @default("Draw")
-  time        DateTime  @default(now())
-  createdById String  
-  createdBy   User      @relation(fields: [createdById], references: [id])
+  fightWinner String   @default("Draw")
+  time        DateTime @default(now())
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
   likes       Like[]
+  views      View[]
+
   @@index([createdById])
 }
-
 
 model Bet {
   id        Int      @id @default(autoincrement())
@@ -93,15 +95,26 @@ model Bet {
   time      DateTime @default(now())
   fightId   Int
   user      User     @relation(fields: [userId], references: [id])
+
   @@index([userId])
 }
 
 model Like {
-  userId    String
-  fightId   Int
-  user      User     @relation(fields: [userId], references: [id])
-  fight     Fight    @relation(fields: [fightId], references: [id])
+  userId  String
+  fightId Int
+  user    User   @relation(fields: [userId], references: [id])
+  fight   Fight  @relation(fields: [fightId], references: [id])
+
+  @@id([userId, fightId])
   @@index([userId])
   @@index([fightId])
-  @@id([userId, fightId])
+}
+
+model View {
+  id      Int      @id @default(autoincrement())
+  fightId Int
+  time    DateTime @default(now())
+  fight   Fight    @relation(fields: [fightId], references: [id])
+
+  @@index([fightId])
 }
