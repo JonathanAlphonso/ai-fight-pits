@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  //previewFeatures = ["jsonProtocol"]
 }
 
 datasource db {
@@ -15,14 +14,12 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  currency      Int       @default(0)
   accounts      Account[]
   sessions      Session[]
   bets          Bet[]
-
-  //not related to Next Auth below
-  currency Int     @default(0)
-  fights   Fight[] // Fights created by the user
-  likes    Like[]
+  fights        Fight[]
+  likes         Like[]
 }
 
 model Account {
@@ -62,38 +59,35 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Below are the models not related to Next Auth
-
 model Fighter {
   id          Int    @id @default(autoincrement())
   name        String
+  powerRating Int
   description String
-  powerRating Int // Overall power rating
 }
 
 model Fight {
   id          Int      @id @default(autoincrement())
-  fightLog    String   @db.Text
   fighter1Id  Int
   fighter2Id  Int
-  // winnerId    Int?
-  fightWinner String   @default("Draw")
   time        DateTime @default(now())
   createdById String
+  fightLog    String   @db.Text
+  fightWinner String   @default("Draw")
+  views       Int      @default(0)
   createdBy   User     @relation(fields: [createdById], references: [id])
   likes       Like[]
-  views      View[]
 
   @@index([createdById])
 }
 
 model Bet {
   id        Int      @id @default(autoincrement())
-  userId    String
-  fighterId Int
   amount    Int
   time      DateTime @default(now())
   fightId   Int
+  userId    String
+  fighterId Int
   user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
@@ -107,14 +101,5 @@ model Like {
 
   @@id([userId, fightId])
   @@index([userId])
-  @@index([fightId])
-}
-
-model View {
-  id      Int      @id @default(autoincrement())
-  fightId Int
-  time    DateTime @default(now())
-  fight   Fight    @relation(fields: [fightId], references: [id])
-
   @@index([fightId])
 }

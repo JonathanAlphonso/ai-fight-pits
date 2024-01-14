@@ -21,6 +21,7 @@ type StoryPageProps = {
       id: string;
       name: string;
     };
+    views: number;
   };
 };
 
@@ -67,6 +68,7 @@ const SingleStoryPage: NextPage<StoryPageProps> = ({ storyData: story }) => {
                 likesCount={story?.likesCount || 0}
                 storyId={story.id}
                 hasUserLiked={story?.hasUserLiked ?? false}
+                views={story?.views ?? 0}
               />
             </>
           )}
@@ -86,6 +88,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       notFound: true,
     };
   }
+  // Increase the views for the story
+  await ssg.fight.addView.fetch({ userId: session?.user.id ||'', fightId: Number(id) });
+  
 
   let storyData = await ssg.fight.getOne.fetch({ userId: session?.user.id ||'', fightId: Number(id) });
 

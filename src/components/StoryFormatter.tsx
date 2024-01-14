@@ -1,10 +1,8 @@
 import React from "react";
-import { VscHeart, VscHeartFilled } from "react-icons/vsc";
+import { VscHeart, VscHeartFilled, VscEye } from "react-icons/vsc";
 import { useState } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
-
-
 
 interface StoryFormatterProps {
   text: string;
@@ -12,7 +10,8 @@ interface StoryFormatterProps {
   fighter2Name: string;
   likesCount: number;
   storyId: number; // Add this line
-  hasUserLiked: boolean; 
+  hasUserLiked: boolean;
+  views: number;
 }
 
 const StoryFormatter: React.FC<StoryFormatterProps> = ({
@@ -22,6 +21,7 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
   likesCount,
   storyId,
   hasUserLiked,
+  views,
 }) => {
   // Remove all quotes
   const trimmedText = text.replace(/"/g, "");
@@ -35,11 +35,8 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
 
   const filteredParagraphs = getFilteredParagraphs(interpretedText || "");
 
-  
-
   const [liked, setLiked] = useState(hasUserLiked);
   console.log("Liked", liked);
-
 
   const [displayedLikes, setDisplayedLikes] = useState(likesCount);
 
@@ -57,7 +54,7 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
       {
         onError: (error) => {
           // Handle the error here
-          console.error('Error toggling like:', error);
+          console.error("Error toggling like:", error);
           // Revert the optimistic UI update
           setLiked(!liked);
           setDisplayedLikes(liked ? displayedLikes - 1 : displayedLikes + 1);
@@ -76,15 +73,19 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
           {paragraph}
         </p>
       ))}
-      <button
-        onClick={handleLikeClick}
-        className={`inline-flex w-12 items-center justify-around rounded-lg border border-white p-2 ${
-          liked ? "text-red-500" : "text-white"
-        }`}
-      >
-        {liked ? <VscHeartFilled /> : <VscHeart />}
-        <span className="ml-1 text-white">{displayedLikes}</span>
-      </button>
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={handleLikeClick}
+          className={`inline-flex w-12 items-center justify-around rounded-lg border border-white p-2 ${
+            liked ? "text-red-500" : "text-white"
+          }`}
+        >
+          {liked ? <VscHeartFilled /> : <VscHeart />}
+          <span className="ml-1 text-white">{displayedLikes}</span>
+        </button>
+        <VscEye />
+        <span className="ml-1 text-white">{views}</span>
+      </div>
     </div>
   );
 };

@@ -50,6 +50,7 @@ const Home: NextPage = () => {
               likesCount={response.likesCount}
               storyId={response.storyId}
               hasUserLiked={response.hasUserLiked}
+              views={0}
             />
           ) : null}
         </div>

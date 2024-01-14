@@ -73,6 +73,7 @@ const StoryList: React.FC<ExtendedStoryListProps> = ({ stories, isLoading, hasMo
                 likesCount={story.likesCount || 0}
                 storyId={story.id}
                 hasUserLiked={story?.hasUserLiked ?? false}
+                views={story?.views ?? 0}
               />
               {story?.createdBy.id === currentUserId && (
                 <>

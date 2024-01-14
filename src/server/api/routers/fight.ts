@@ -224,15 +224,23 @@ export const fightRouter = createTRPCRouter({
     };
   }),
   addView: publicProcedure
-  .input(z.number()) // accept fightId as input
-  .mutation(async ({ input: fightId, ctx }) => {
-    // Create a new view record
-    await ctx.prisma.view.create({
+  .input(z.object({ userId: z.string(), fightId: z.number().optional() }))
+  .query(async ({ input, ctx }) => {
+    const { fightId } = input; // Correctly destructure input to get fightId
+      // Increment the viewCount field by 1
+    const fight = await ctx.prisma.fight.update({
+      where: { id: fightId },
       data: {
-        fightId: fightId,
+        views: {
+          increment: 1,
+        },
       },
     });
-
+  
+    if (!fight) {
+      throw new Error('Fight not found');
+    }
+  
     return { message: 'View added successfully' };
   }),
 });

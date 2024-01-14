@@ -19,6 +19,7 @@ export type Story = {
   createdById: string;
   likesCount: number;
   hasUserLiked: boolean;
+  views: number;
 };
 
 
