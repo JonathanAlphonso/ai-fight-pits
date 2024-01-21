@@ -14,7 +14,7 @@ type StoryPageProps = {
     fighter1Name: string;
     fighter2Name: string;
     fightLog: string;
-    likesCount: number;
+    likeCount: number;
     hasUserLiked: boolean;
     time: string;
     createdBy: {
@@ -65,7 +65,7 @@ const SingleStoryPage: NextPage<StoryPageProps> = ({ storyData: story }) => {
                 text={story?.fightLog || ""}
                 fighter1Name={story?.fighter1Name || ""}
                 fighter2Name={story?.fighter2Name || ""}
-                likesCount={story?.likesCount || 0}
+                likeCount={story?.likeCount || 0}
                 storyId={story.id}
                 hasUserLiked={story?.hasUserLiked ?? false}
                 views={story?.views ?? 0}

@@ -15,10 +15,20 @@ export const likeRouter = createTRPCRouter({
       });
 
       if (existingLike == null) {
+        // If the like does not exist, create it and increment the likeCount field
         await ctx.prisma.like.create({ data });
+        await ctx.prisma.fight.update({
+          where: { id: fightId },
+          data: { likeCount: { increment: 1 } },
+        });
         return { addedLike: true };
       } else {
+        // If the like exists, delete it and decrement the likeCount field
         await ctx.prisma.like.delete({ where: { userId_fightId: data } });
+        await ctx.prisma.fight.update({
+          where: { id: fightId },
+          data: { likeCount: { decrement: 1 } },
+        });
         return { addedLike: false };
       }
     }),

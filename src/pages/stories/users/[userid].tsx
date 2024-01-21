@@ -11,7 +11,7 @@ const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
   const { data: session } = useSession();
   const currentUserId = session?.user?.id ?? "";
 
-  const { stories, isLoading, error, hasMore, page, fetchMoreData } =
+  const { stories, isLoading, error, hasMore, page, fetchMoreData,handleDelete, sort, setSort } =
     useStories(userid);
   //Shows as a big header below the navbar
   let title = "Your Fight Stories";
@@ -42,6 +42,9 @@ const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
             hasMore={hasMore}
             fetchMoreData={fetchMoreData}
             currentUserId={session?.user?.id ?? "Unknown"}
+            handleDelete={handleDelete}
+            sort={sort}
+            setSort={setSort}
           />
         </div>
       </main>

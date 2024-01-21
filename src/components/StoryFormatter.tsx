@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { VscHeart, VscHeartFilled, VscEye } from "react-icons/vsc";
 import { useState } from "react";
 import { api } from "~/utils/api";
@@ -8,7 +8,7 @@ interface StoryFormatterProps {
   text: string;
   fighter1Name: string;
   fighter2Name: string;
-  likesCount: number;
+  likeCount: number;
   storyId: number; // Add this line
   hasUserLiked: boolean;
   views: number;
@@ -18,7 +18,7 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
   text,
   fighter1Name,
   fighter2Name,
-  likesCount,
+  likeCount,
   storyId,
   hasUserLiked,
   views,
@@ -38,7 +38,15 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
   const [liked, setLiked] = useState(hasUserLiked);
   console.log("Liked", liked);
 
-  const [displayedLikes, setDisplayedLikes] = useState(likesCount);
+  const [displayedLikes, setDisplayedLikes] = useState(likeCount);
+
+  useEffect(() => {
+    setDisplayedLikes(likeCount);
+  }, [likeCount]);
+
+  useEffect(() => {
+    setLiked(hasUserLiked);
+  }, [hasUserLiked]);
 
   const toggleLikeMutation = api.like.toggleLike.useMutation();
 

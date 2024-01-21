@@ -1,39 +1,29 @@
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Story, StoryListProps } from "~/types/types";
 import StoryFormatter from "./StoryFormatter";
-import { api } from "~/utils/api";
 import InfiniteScroll from "react-infinite-scroll-component";
 import ClipLoader from "react-spinners/ClipLoader";
 
 type ExtendedStoryListProps = StoryListProps & {
+  currentUserId: string | null;
   stories: Story[];
   isLoading: boolean;
   hasMore: boolean;
   fetchMoreData: () => void;
+  setSort: (sort: string) => void;
+  sort: string;
+  handleDelete: (id: number) => void;
 };
 
-const StoryList: React.FC<ExtendedStoryListProps> = ({ stories, isLoading, hasMore, fetchMoreData, currentUserId }) => {
-  const [localStories, setLocalStories] = useState<Story[]>(stories);
-  const deleteFightMutation = api.fight.delete.useMutation();
-
-  console.log(localStories);
-
-  useEffect(() => {
-    setLocalStories(stories);
-  }, [stories]);
-
-  const handleDelete = (id: number) => {
-    deleteFightMutation.mutate(id, {
-      onSuccess: () => {
-        setLocalStories(localStories.filter((story) => story.id !== id));
-      },
-    });
+const StoryList: React.FC<ExtendedStoryListProps> = ({ currentUserId, stories, isLoading, hasMore, fetchMoreData, setSort, sort, handleDelete }) => {
+  console.log("Stories", stories);
+  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSort(event.target.value);
   };
 
   return (
     <InfiniteScroll
-      dataLength={localStories.length}
+      dataLength={stories.length}
       next={fetchMoreData}
       hasMore={hasMore}
       loader={
@@ -63,14 +53,19 @@ const StoryList: React.FC<ExtendedStoryListProps> = ({ stories, isLoading, hasMo
         </p>
       }
     >
-      {localStories.length > 0
-        ? localStories.map((story: Story, index: number) => (
+      <select value={sort} onChange={handleSortChange}>
+        <option value="newest">Newest</option>
+        <option value="mostViewed">Most Viewed</option>
+        <option value="mostLiked">Most Liked</option>
+      </select>
+      {stories.length > 0
+        ? stories.map((story: Story, index: number) => (
             <div key={index} className="story-container mb-4">
               <StoryFormatter
                 text={story.fightLog}
                 fighter1Name={story.fighter1Name || ""}
                 fighter2Name={story.fighter2Name || ""}
-                likesCount={story.likesCount || 0}
+                likeCount={story.likeCount}
                 storyId={story.id}
                 hasUserLiked={story?.hasUserLiked ?? false}
                 views={story?.views ?? 0}

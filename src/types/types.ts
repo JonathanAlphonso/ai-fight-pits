@@ -17,7 +17,7 @@ export type Story = {
   fightWinner: string | null;
   time: string | Date; // Adjusted to accept both Date and string
   createdById: string;
-  likesCount: number;
+  likeCount: number;
   hasUserLiked: boolean;
   views: number;
 };
@@ -58,7 +58,7 @@ export type Response = {
   story: string;
   fighter1Name: string;
   fighter2Name: string;
-  likesCount: number;
+  likeCount: number;
   storyId: number;
   hasUserLiked: boolean;
 };

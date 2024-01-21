@@ -46,7 +46,7 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
                 story: newFight,
                 fighter1Name: character1,
                 fighter2Name: character2,
-                likesCount: 0, // default value
+                likeCount: 0, // default value
                 storyId: createdFight.id, // use the id from the created fight
                 hasUserLiked: false, // default value
               });

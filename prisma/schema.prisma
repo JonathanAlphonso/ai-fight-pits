@@ -75,6 +75,7 @@ model Fight {
   fightLog    String   @db.Text
   fightWinner String   @default("Draw")
   views       Int      @default(0)
+  likeCount   Int      @default(0) // Added this line
   createdBy   User     @relation(fields: [createdById], references: [id])
   likes       Like[]
 
@@ -97,7 +98,7 @@ model Like {
   userId  String
   fightId Int
   user    User   @relation(fields: [userId], references: [id])
-  fight   Fight  @relation(fields: [fightId], references: [id])
+  fight   Fight  @relation(fields: [fightId], references: [id], onDelete: Cascade)
 
   @@id([userId, fightId])
   @@index([userId])

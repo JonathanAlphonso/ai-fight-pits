@@ -7,10 +7,9 @@ import LoadingScreen from "~/components/LoadingScreen";
 
 
 const AllUserStories: NextPage = () => {
-  const { data: session } = useSession();
   
 
-  const { stories, isLoading, error, hasMore, page, fetchMoreData } =
+  const { stories, isLoading, error, hasMore, page, fetchMoreData, handleDelete, sort, setSort } =
     useStories();
 
   if (error) return (<div>Error: {error.message}</div>);
@@ -22,7 +21,6 @@ const AllUserStories: NextPage = () => {
 
   return (
     <>
-
       <Head>
         <title>User Fight Stories</title>
         <meta name="description" content="User-generated fight stories" />
@@ -38,7 +36,10 @@ const AllUserStories: NextPage = () => {
             isLoading={isLoading}
             hasMore={hasMore}
             fetchMoreData={fetchMoreData}
-            currentUserId={session?.user?.id ?? "Unknown"}
+            currentUserId={null}
+            handleDelete={handleDelete}
+            sort={sort}
+            setSort={setSort}
           />
         </div>
       </main>

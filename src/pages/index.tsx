@@ -47,7 +47,7 @@ const Home: NextPage = () => {
               text={response.story}
               fighter1Name={response.fighter1Name}
               fighter2Name={response.fighter2Name}
-              likesCount={response.likesCount}
+              likeCount={response.likeCount}
               storyId={response.storyId}
               hasUserLiked={response.hasUserLiked}
               views={0}

@@ -1,6 +1,7 @@
 import superjson from "superjson";
 import { createServerSideHelpers } from "@trpc/react-query/server";
-import { appRouter,AppRouter } from "./root";
+import { appRouter } from "./root";
+import type { AppRouter } from "./root";
 import { createInnerTRPCContext } from "./trpc";
 
 export function ssgHelper() {
