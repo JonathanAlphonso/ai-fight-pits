@@ -17,8 +17,8 @@ type ExtendedStoryListProps = StoryListProps & {
 
 const StoryList: React.FC<ExtendedStoryListProps> = ({ currentUserId, stories, isLoading, hasMore, fetchMoreData, setSort, sort, handleDelete }) => {
   console.log("Stories", stories);
-  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSort(event.target.value);
+  const handleSortChange = (sort: string) => {
+    setSort(sort);
   };
 
   return (
@@ -53,11 +53,26 @@ const StoryList: React.FC<ExtendedStoryListProps> = ({ currentUserId, stories, i
         </p>
       }
     >
-      <select value={sort} onChange={handleSortChange}>
-        <option value="newest">Newest</option>
-        <option value="mostViewed">Most Viewed</option>
-        <option value="mostLiked">Most Liked</option>
-      </select>
+      <div className="flex space-x-4 border rounded-full p-2 bg-black mb-4">
+        <button 
+          className={`px-4 py-2 rounded-full ${sort === 'newest' ? 'bg-[hsl(260,100%,60%)] text-white' : 'bg-[hsl(280,100%,70%)] text-black'}`} 
+          onClick={() => handleSortChange("newest")}
+        >
+          Newest
+        </button>
+        <button 
+          className={`px-4 py-2 rounded-full ${sort === 'mostViewed' ? 'bg-[hsl(260,100%,60%)] text-white' : 'bg-[hsl(280,100%,70%)] text-black'}`} 
+          onClick={() => handleSortChange("mostViewed")}
+        >
+          Most Viewed
+        </button>
+        <button 
+          className={`px-4 py-2 rounded-full ${sort === 'mostLiked' ? 'bg-[hsl(260,100%,60%)] text-white' : 'bg-[hsl(280,100%,70%)] text-black'}`} 
+          onClick={() => handleSortChange("mostLiked")}
+        >
+          Most Liked
+        </button>
+      </div>
       {stories.length > 0
         ? stories.map((story: Story, index: number) => (
             <div key={index} className="story-container mb-4">
@@ -84,7 +99,7 @@ const StoryList: React.FC<ExtendedStoryListProps> = ({ currentUserId, stories, i
                 href={`/stories/${story?.id}`}
                 className="mt-2 inline-block rounded bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-700"
               >
-                Link to Story Page
+                Continue Reading
               </Link>
             </div>
           ))

@@ -13,9 +13,9 @@ export const useStories = (userid?: string, initialPage = 1, initialSort = 'newe
     error,
   } = userid
     ? // If a user is specified, fetch their stories
-      api.fight.getAllByUser.useQuery({ userid, page, sort }, { enabled: !!userid })
+      api.fight.getAllSummariesByUser.useQuery({ userid, page, sort }, { enabled: !!userid })
     : // If no user ID is provided in the url, fetch all stories
-      api.fight.getAll.useQuery({ page, sort });
+      api.fight.getAllSummaries.useQuery({ page, sort });
   console.log("useStories hook has loaded!");
   console.log("current page is: ", page);
 

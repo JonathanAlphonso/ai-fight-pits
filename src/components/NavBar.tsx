@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { useSession, signIn, signOut } from 'next-auth/react'
 
@@ -15,8 +15,11 @@ const NavBar = () => {
   const authPages = session ? [
     { name: 'Your Stories', path: `/stories/users/${session.user.id}` },
     { name: 'Profile', path: '/users/profile' },
-
   ] : []
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <nav className="bg-[#2e026d] border-b border-white p-4 px-6">

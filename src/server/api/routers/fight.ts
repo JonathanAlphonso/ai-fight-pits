@@ -6,6 +6,11 @@ import {
 } from "~/server/api/trpc";
 import type { Context } from "~/server/api/trpc";
 
+// Helper function to get the first 55 words of a string
+function getFirst55Words(str: string): string {
+  return str.split(" ").slice(0, 55).join(" ") + "...";
+}
+
 async function getFighterNameById(ctx: Context, id: number): Promise<string> {
   const fighter = await ctx.prisma.fighter.findUnique({
     where: { id: id },
@@ -181,7 +186,80 @@ export const fightRouter = createTRPCRouter({
 
       return Promise.all(fightsWithNames);
     }),
-  getAll: publicProcedure
+    getAllSummariesByUser: publicProcedure
+    .input(
+      z.object({
+        userid: z.string(),
+        page: z.number().optional(),
+        sort: z.string().optional(),
+      })
+    ) // accept userid, page, and sort as input
+    .query(async ({ input, ctx }) => {
+      const { userid, page = 1, sort = "newest" } = input; // get the userid, page, and sort from the input
+      const limit = 5; // or however many stories you want per page
+      const offset = (page - 1) * limit; // calculate the offset
+
+      let orderBy: {
+        views?: "asc" | "desc";
+        likeCount?: "asc" | "desc"; // Changed this line
+        time?: "asc" | "desc";
+      };
+      switch (sort) {
+        case "mostViewed":
+          orderBy = { views: "desc" };
+          break;
+        case "mostLiked":
+          orderBy = { likeCount: "desc" }; // Changed this line
+          break;
+        default:
+          orderBy = { time: "desc" };
+      }
+
+      const fights = await ctx.prisma.fight.findMany({
+        where: {
+          createdById: userid, // use the userid to fetch the fights
+        },
+        include: { createdBy: true }, // Include the createdBy user
+        orderBy,
+        take: limit,
+        skip: offset,
+      });
+
+      // Get the names of the fighters and ensure createdBy.name is not null
+      const fightsWithNames = fights.map(async (fight) => {
+        const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
+        const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+
+        // Check if the user has liked the fight
+        const hasUserLiked =
+          ctx.session && ctx?.session.user
+            ? (await ctx.prisma.like.findUnique({
+                where: {
+                  userId_fightId: {
+                    userId: ctx.session.user.id,
+                    fightId: fight.id,
+                  },
+                },
+              })) != null
+            : false;
+
+        return {
+          ...fight,
+          fightLog: getFirst55Words(fight.fightLog),
+          fighter1Name,
+          fighter2Name,
+          createdBy: {
+            ...fight.createdBy,
+            name: fight.createdBy.name || "Unknown",
+          },
+          likeCount: fight.likeCount, // Directly access the likeCount field
+          hasUserLiked, // Return whether the user has liked the fight
+        };
+      });
+
+      return Promise.all(fightsWithNames);
+    }),
+    getAll: publicProcedure
     .input(
       z.object({ page: z.number().optional(), sort: z.string().optional() })
     ) // accept page and sort as input
@@ -236,6 +314,75 @@ export const fightRouter = createTRPCRouter({
 
         return {
           ...fight,
+          fighter1Name,
+          fighter2Name,
+          createdBy: {
+            ...fight.createdBy,
+            name: fight.createdBy.name || "Unknown",
+          },
+          likeCount: fight.likeCount, // Directly access the likeCount field
+          hasUserLiked, // Return whether the user has liked the fight
+        };
+      });
+
+      return Promise.all(fightsWithNames);
+    }),
+  getAllSummaries: publicProcedure
+    .input(
+      z.object({ page: z.number().optional(), sort: z.string().optional() })
+    ) // accept page and sort as input
+    .query(async ({ input, ctx }) => {
+      const { page = 1, sort = "newest" } = input; // get the page and sort from the input
+      const limit = 5; // or however many stories you want per page
+      const offset = (page - 1) * limit; // calculate the offset
+
+      let orderBy: {
+        views?: "asc" | "desc";
+        likeCount?: "asc" | "desc"; // Changed this line
+        time?: "asc" | "desc";
+      };
+      switch (sort) {
+        case "mostViewed":
+          orderBy = { views: "desc" };
+          break;
+        case "mostLiked":
+          orderBy = { likeCount: "desc" }; // Changed this line
+          break;
+        case "newest":
+          orderBy = { time: "desc" };
+          break;
+        default:
+          orderBy = { time: "desc" };
+      }
+
+      const fights = await ctx.prisma.fight.findMany({
+        include: { createdBy: true },
+        orderBy,
+        take: limit,
+        skip: offset,
+      });
+
+      // Get the names of the fighters and ensure createdBy.name is not null
+      const fightsWithNames = fights.map(async (fight) => {
+        const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
+        const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+
+        // Check if the user has liked the fight
+        const hasUserLiked =
+          ctx.session && ctx.session.user
+            ? (await ctx.prisma.like.findUnique({
+                where: {
+                  userId_fightId: {
+                    userId: ctx.session.user.id,
+                    fightId: fight.id,
+                  },
+                },
+              })) != null
+            : false;
+
+        return {
+          ...fight,
+          fightLog: getFirst55Words(fight.fightLog),
           fighter1Name,
           fighter2Name,
           createdBy: {

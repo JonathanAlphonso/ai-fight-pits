@@ -1,4 +1,3 @@
-import { useSession } from "next-auth/react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import StoryList from "~/components/StoryList";
