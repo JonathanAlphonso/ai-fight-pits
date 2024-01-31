@@ -83,3 +83,9 @@ export type CreateChatCompletionResponse = {
     }
   ];
 };
+
+
+export type PaginationInput = {
+  page?: number;
+  sort?: string;
+};

@@ -5,13 +5,15 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import type { Context } from "~/server/api/trpc";
+import type {PaginationInput} from "~/types/types";
 
 // Helper function to get the first 55 words of a string
 function getFirst55Words(str: string): string {
   return str.split(" ").slice(0, 55).join(" ") + "...";
 }
 
-async function getFighterNameById(ctx: Context, id: number): Promise<string> {
+// Helper function to retrieve a fighter by ID
+async function getFighter(ctx: Context, id: number) {
   const fighter = await ctx.prisma.fighter.findUnique({
     where: { id: id },
   });
@@ -20,7 +22,24 @@ async function getFighterNameById(ctx: Context, id: number): Promise<string> {
     throw new Error(`Fighter with id ${id} not found`);
   }
 
-  return fighter.name;
+  return fighter;
+}
+
+type Fight = {
+  id: number;
+  fighter1Id: number;
+  fighter2Id: number;
+};
+
+// Helper function to retrieve fighter names
+async function getFighterNames(ctx: Context, fight: Fight) {
+  const fighter1 = await getFighter(ctx, fight.fighter1Id);
+  const fighter2 = await getFighter(ctx, fight.fighter2Id);
+
+  return {
+    fighter1Name: fighter1.name,
+    fighter2Name: fighter2.name,
+  };
 }
 
 function toTitleCase(str: string): string {
@@ -29,6 +48,45 @@ function toTitleCase(str: string): string {
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+// Helper function for pagination and sorting
+function getPaginationAndSorting(input: PaginationInput) {
+  const { page = 1, sort = "newest" } = input;
+  const limit = 5;
+  const offset = (page - 1) * limit;
+
+  let orderBy: {
+    views?: "asc" | "desc";
+    likeCount?: "asc" | "desc";
+    time?: "asc" | "desc";
+  };
+  switch (sort) {
+    case "mostViewed":
+      orderBy = { views: "desc" };
+      break;
+    case "mostLiked":
+      orderBy = { likeCount: "desc" };
+      break;
+    default:
+      orderBy = { time: "desc" };
+  }
+
+  return { limit, offset, orderBy };
+}
+
+// Helper function to check if a user has liked a fight
+async function hasUserLikedFight(ctx: Context, fight: Fight) {
+  return ctx.session && ctx.session.user
+    ? (await ctx.prisma.like.findUnique({
+        where: {
+          userId_fightId: {
+            userId: ctx.session.user.id,
+            fightId: fight.id,
+          },
+        },
+      })) != null
+    : false;
 }
 
 export const fightRouter = createTRPCRouter({
@@ -47,15 +105,11 @@ export const fightRouter = createTRPCRouter({
       // Check if fighters exist in the database
       let fighter1, fighter2;
       if (input.fighter1Id !== undefined) {
-        fighter1 = await ctx.prisma.fighter.findUnique({
-          where: { id: input.fighter1Id },
-        });
+        fighter1 = await getFighter(ctx, input.fighter1Id);
       }
 
       if (input.fighter2Id !== undefined) {
-        fighter2 = await ctx.prisma.fighter.findUnique({
-          where: { id: input.fighter2Id },
-        });
+        fighter2 = await getFighter(ctx, input.fighter2Id);
       }
 
       // If fighters don't exist, create new entries
@@ -123,25 +177,8 @@ export const fightRouter = createTRPCRouter({
       })
     ) // accept userid, page, and sort as input
     .query(async ({ input, ctx }) => {
-      const { userid, page = 1, sort = "newest" } = input; // get the userid, page, and sort from the input
-      const limit = 5; // or however many stories you want per page
-      const offset = (page - 1) * limit; // calculate the offset
-
-      let orderBy: {
-        views?: "asc" | "desc";
-        likeCount?: "asc" | "desc"; // Changed this line
-        time?: "asc" | "desc";
-      };
-      switch (sort) {
-        case "mostViewed":
-          orderBy = { views: "desc" };
-          break;
-        case "mostLiked":
-          orderBy = { likeCount: "desc" }; // Changed this line
-          break;
-        default:
-          orderBy = { time: "desc" };
-      }
+      const { userid } = input; // get the userid from the input
+      const { limit, offset, orderBy } = getPaginationAndSorting(input);
 
       const fights = await ctx.prisma.fight.findMany({
         where: {
@@ -155,26 +192,15 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
-        const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
 
         // Check if the user has liked the fight
-        const hasUserLiked =
-          ctx.session && ctx?.session.user
-            ? (await ctx.prisma.like.findUnique({
-                where: {
-                  userId_fightId: {
-                    userId: ctx.session.user.id,
-                    fightId: fight.id,
-                  },
-                },
-              })) != null
-            : false;
+        const hasUserLiked = await hasUserLikedFight(ctx, fight);
 
         return {
           ...fight,
-          fighter1Name,
-          fighter2Name,
+          fighter1Name: fighter1Name,
+          fighter2Name: fighter2Name,
           createdBy: {
             ...fight.createdBy,
             name: fight.createdBy.name || "Unknown",
@@ -195,25 +221,8 @@ export const fightRouter = createTRPCRouter({
       })
     ) // accept userid, page, and sort as input
     .query(async ({ input, ctx }) => {
-      const { userid, page = 1, sort = "newest" } = input; // get the userid, page, and sort from the input
-      const limit = 5; // or however many stories you want per page
-      const offset = (page - 1) * limit; // calculate the offset
-
-      let orderBy: {
-        views?: "asc" | "desc";
-        likeCount?: "asc" | "desc"; // Changed this line
-        time?: "asc" | "desc";
-      };
-      switch (sort) {
-        case "mostViewed":
-          orderBy = { views: "desc" };
-          break;
-        case "mostLiked":
-          orderBy = { likeCount: "desc" }; // Changed this line
-          break;
-        default:
-          orderBy = { time: "desc" };
-      }
+      const { userid } = input; // get the userid from the input
+      const { limit, offset, orderBy } = getPaginationAndSorting(input);
 
       const fights = await ctx.prisma.fight.findMany({
         where: {
@@ -227,27 +236,16 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
-        const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
 
         // Check if the user has liked the fight
-        const hasUserLiked =
-          ctx.session && ctx?.session.user
-            ? (await ctx.prisma.like.findUnique({
-                where: {
-                  userId_fightId: {
-                    userId: ctx.session.user.id,
-                    fightId: fight.id,
-                  },
-                },
-              })) != null
-            : false;
+        const hasUserLiked = await hasUserLikedFight(ctx, fight);
 
         return {
           ...fight,
           fightLog: getFirst55Words(fight.fightLog),
-          fighter1Name,
-          fighter2Name,
+          fighter1Name: fighter1Name,
+          fighter2Name: fighter2Name,
           createdBy: {
             ...fight.createdBy,
             name: fight.createdBy.name || "Unknown",
@@ -264,28 +262,7 @@ export const fightRouter = createTRPCRouter({
       z.object({ page: z.number().optional(), sort: z.string().optional() })
     ) // accept page and sort as input
     .query(async ({ input, ctx }) => {
-      const { page = 1, sort = "newest" } = input; // get the page and sort from the input
-      const limit = 5; // or however many stories you want per page
-      const offset = (page - 1) * limit; // calculate the offset
-
-      let orderBy: {
-        views?: "asc" | "desc";
-        likeCount?: "asc" | "desc"; // Changed this line
-        time?: "asc" | "desc";
-      };
-      switch (sort) {
-        case "mostViewed":
-          orderBy = { views: "desc" };
-          break;
-        case "mostLiked":
-          orderBy = { likeCount: "desc" }; // Changed this line
-          break;
-        case "newest":
-          orderBy = { time: "desc" };
-          break;
-        default:
-          orderBy = { time: "desc" };
-      }
+      const { limit, offset, orderBy } = getPaginationAndSorting(input);
 
       const fights = await ctx.prisma.fight.findMany({
         include: { createdBy: true },
@@ -296,26 +273,15 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
-        const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
 
         // Check if the user has liked the fight
-        const hasUserLiked =
-          ctx.session && ctx.session.user
-            ? (await ctx.prisma.like.findUnique({
-                where: {
-                  userId_fightId: {
-                    userId: ctx.session.user.id,
-                    fightId: fight.id,
-                  },
-                },
-              })) != null
-            : false;
+        const hasUserLiked = await hasUserLikedFight(ctx, fight);
 
         return {
           ...fight,
-          fighter1Name,
-          fighter2Name,
+          fighter1Name: fighter1Name,
+          fighter2Name: fighter2Name,
           createdBy: {
             ...fight.createdBy,
             name: fight.createdBy.name || "Unknown",
@@ -332,28 +298,7 @@ export const fightRouter = createTRPCRouter({
       z.object({ page: z.number().optional(), sort: z.string().optional() })
     ) // accept page and sort as input
     .query(async ({ input, ctx }) => {
-      const { page = 1, sort = "newest" } = input; // get the page and sort from the input
-      const limit = 5; // or however many stories you want per page
-      const offset = (page - 1) * limit; // calculate the offset
-
-      let orderBy: {
-        views?: "asc" | "desc";
-        likeCount?: "asc" | "desc"; // Changed this line
-        time?: "asc" | "desc";
-      };
-      switch (sort) {
-        case "mostViewed":
-          orderBy = { views: "desc" };
-          break;
-        case "mostLiked":
-          orderBy = { likeCount: "desc" }; // Changed this line
-          break;
-        case "newest":
-          orderBy = { time: "desc" };
-          break;
-        default:
-          orderBy = { time: "desc" };
-      }
+      const { limit, offset, orderBy } = getPaginationAndSorting(input);
 
       const fights = await ctx.prisma.fight.findMany({
         include: { createdBy: true },
@@ -364,27 +309,16 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
-        const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
 
         // Check if the user has liked the fight
-        const hasUserLiked =
-          ctx.session && ctx.session.user
-            ? (await ctx.prisma.like.findUnique({
-                where: {
-                  userId_fightId: {
-                    userId: ctx.session.user.id,
-                    fightId: fight.id,
-                  },
-                },
-              })) != null
-            : false;
+        const hasUserLiked = await hasUserLikedFight(ctx, fight);
 
         return {
           ...fight,
           fightLog: getFirst55Words(fight.fightLog),
-          fighter1Name,
-          fighter2Name,
+          fighter1Name: fighter1Name,
+          fighter2Name: fighter2Name,
           createdBy: {
             ...fight.createdBy,
             name: fight.createdBy.name || "Unknown",
@@ -409,20 +343,15 @@ export const fightRouter = createTRPCRouter({
         throw new Error("Fight not found");
       }
 
-      const fighter1Name = await getFighterNameById(ctx, fight.fighter1Id);
-      const fighter2Name = await getFighterNameById(ctx, fight.fighter2Id);
+      const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
 
       // Check if the user has liked the fight
-      const hasUserLiked = userId
-        ? (await ctx.prisma.like.findUnique({
-            where: { userId_fightId: { userId: userId, fightId: fight.id } },
-          })) != null
-        : false;
+      const hasUserLiked = await hasUserLikedFight(ctx, fight);
 
       return {
         ...fight,
-        fighter1Name,
-        fighter2Name,
+        fighter1Name: fighter1Name,
+        fighter2Name: fighter2Name,
         createdBy: fight.createdBy, // Return the createdBy user
         id: fight.id, // Return the id of the fight
         likeCount: fight.likeCount, // Directly access the likeCount field
