@@ -333,7 +333,7 @@ export const fightRouter = createTRPCRouter({
   getOne: publicProcedure
     .input(z.object({ userId: z.string(), fightId: z.number().optional() }))
     .query(async ({ input, ctx }) => {
-      const { userId, fightId } = input;
+      const {fightId } = input;
       const fight = await ctx.prisma.fight.findUnique({
         where: { id: fightId },
         include: { createdBy: true }, // Include the createdBy user
