@@ -16,9 +16,15 @@ type ExtendedStoryListProps = StoryListProps & {
 };
 
 const StoryList: React.FC<ExtendedStoryListProps> = ({ currentUserId, stories, isLoading, hasMore, fetchMoreData, setSort, sort, handleDelete }) => {
-  console.log("Stories", stories);
-  const handleSortChange = (sort: string) => {
-    setSort(sort);
+  const handleSortChange = (newSort: string) => {
+    if (newSort !== sort) {
+      setSort(newSort);
+      // Reset any relevant pagination state here, if applicable
+      // For example, if you have a `resetPagination` function or need to set `page` state to 1
+      // resetPagination(); or setPage(1);
+      // Then, trigger a refetch based on the new sort criteria
+      // This might involve calling `fetchMoreData` directly or through another function that resets the data and fetches
+    }
   };
 
   return (

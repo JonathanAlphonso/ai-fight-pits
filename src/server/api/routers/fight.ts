@@ -5,7 +5,7 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 import type { Context } from "~/server/api/trpc";
-import type {PaginationInput} from "~/types/types";
+import type { PaginationInput } from "~/types/types";
 
 // Helper function to get the first 55 words of a string
 function getFirst55Words(str: string): string {
@@ -56,21 +56,19 @@ function getPaginationAndSorting(input: PaginationInput) {
   const limit = 5;
   const offset = (page - 1) * limit;
 
-  let orderBy: {
-    views?: "asc" | "desc";
-    likeCount?: "asc" | "desc";
-    time?: "asc" | "desc";
-  };
+  let orderBy: Array<{ views?: "asc" | "desc"; likeCount?: "asc" | "desc"; time?: "asc" | "desc"; id?: "asc" | "desc" }>;
   switch (sort) {
     case "mostViewed":
-      orderBy = { views: "desc" };
+      orderBy = [{ views: "desc" }, { id: "desc" }];
       break;
     case "mostLiked":
-      orderBy = { likeCount: "desc" };
+      orderBy = [{ likeCount: "desc" }, { id: "desc" }];
       break;
     default:
-      orderBy = { time: "desc" };
+      orderBy = [{ time: "desc" }, { id: "desc" }];
   }
+
+  console.log({ limit, offset, orderBy }); // Log the parameters
 
   return { limit, offset, orderBy };
 }
@@ -192,7 +190,10 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
+        const { fighter1Name, fighter2Name } = await getFighterNames(
+          ctx,
+          fight
+        );
 
         // Check if the user has liked the fight
         const hasUserLiked = await hasUserLikedFight(ctx, fight);
@@ -212,7 +213,7 @@ export const fightRouter = createTRPCRouter({
 
       return Promise.all(fightsWithNames);
     }),
-    getAllSummariesByUser: publicProcedure
+  getAllSummariesByUser: publicProcedure
     .input(
       z.object({
         userid: z.string(),
@@ -236,7 +237,10 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
+        const { fighter1Name, fighter2Name } = await getFighterNames(
+          ctx,
+          fight
+        );
 
         // Check if the user has liked the fight
         const hasUserLiked = await hasUserLikedFight(ctx, fight);
@@ -257,7 +261,7 @@ export const fightRouter = createTRPCRouter({
 
       return Promise.all(fightsWithNames);
     }),
-    getAll: publicProcedure
+  getAll: publicProcedure
     .input(
       z.object({ page: z.number().optional(), sort: z.string().optional() })
     ) // accept page and sort as input
@@ -273,7 +277,10 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
+        const { fighter1Name, fighter2Name } = await getFighterNames(
+          ctx,
+          fight
+        );
 
         // Check if the user has liked the fight
         const hasUserLiked = await hasUserLikedFight(ctx, fight);
@@ -309,7 +316,10 @@ export const fightRouter = createTRPCRouter({
 
       // Get the names of the fighters and ensure createdBy.name is not null
       const fightsWithNames = fights.map(async (fight) => {
-        const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
+        const { fighter1Name, fighter2Name } = await getFighterNames(
+          ctx,
+          fight
+        );
 
         // Check if the user has liked the fight
         const hasUserLiked = await hasUserLikedFight(ctx, fight);
@@ -333,7 +343,7 @@ export const fightRouter = createTRPCRouter({
   getOne: publicProcedure
     .input(z.object({ userId: z.string(), fightId: z.number().optional() }))
     .query(async ({ input, ctx }) => {
-      const {fightId } = input;
+      const { fightId } = input;
       const fight = await ctx.prisma.fight.findUnique({
         where: { id: fightId },
         include: { createdBy: true }, // Include the createdBy user
@@ -346,7 +356,14 @@ export const fightRouter = createTRPCRouter({
       const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
 
       // Check if the user has liked the fight
-      const hasUserLiked = await hasUserLikedFight(ctx, fight);
+      // Since the single story page is server side rendered, we must get userId from the input
+      const hasUserLiked = input.userId
+        ? (await ctx.prisma.like.findUnique({
+            where: {
+              userId_fightId: { userId: input.userId, fightId: fight.id },
+            },
+          })) != null
+        : false;
 
       return {
         ...fight,

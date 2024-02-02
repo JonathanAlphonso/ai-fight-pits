@@ -54,14 +54,7 @@ export const useStories = (userid?: string, initialPage = 1, initialSort = 'newe
           ...prevStories,
 
           // Add the new stories from updatedStories, but only if they don't already exist in prevStories
-          ...updatedStories.filter(
-            // For each updated story, check if it already exists in prevStories
-            (updatedStory) =>
-              // The 'some' method returns true if at least one element in the array satisfies the provided condition
-              // In this case, the condition is that the id of the prevStory matches the id of the updatedStory
-              // The '!' operator negates the result, so this condition will return true only if the updatedStory does NOT already exist in prevStories
-              !prevStories.some((prevStory) => prevStory.id === updatedStory.id)
-          ),
+          ...updatedStories
         ]);
       }
     }
@@ -70,6 +63,7 @@ export const useStories = (userid?: string, initialPage = 1, initialSort = 'newe
   useEffect(() => {
     // Reset page to 1 when sort order changes
     setPage(1);
+    setHasMore(true);
   }, [sort]);
 
   const fetchMoreData = () => {

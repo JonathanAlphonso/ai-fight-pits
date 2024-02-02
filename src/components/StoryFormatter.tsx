@@ -36,7 +36,6 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
   const filteredParagraphs = getFilteredParagraphs(interpretedText || "");
 
   const [liked, setLiked] = useState(hasUserLiked);
-  console.log("Liked", liked);
 
   const [displayedLikes, setDisplayedLikes] = useState(likeCount);
 
