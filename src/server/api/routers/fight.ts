@@ -25,16 +25,10 @@ async function getFighter(ctx: Context, id: number) {
   return fighter;
 }
 
-type Fight = {
-  id: number;
-  fighter1Id: number;
-  fighter2Id: number;
-};
-
 // Helper function to retrieve fighter names
-async function getFighterNames(ctx: Context, fight: Fight) {
-  const fighter1 = await getFighter(ctx, fight.fighter1Id);
-  const fighter2 = await getFighter(ctx, fight.fighter2Id);
+async function getFighterNames(ctx: Context, fighters: { fighter1Id: number; fighter2Id: number }) {
+  const fighter1 = await getFighter(ctx, fighters.fighter1Id);
+  const fighter2 = await getFighter(ctx, fighters.fighter2Id);
 
   return {
     fighter1Name: fighter1.name,
@@ -74,13 +68,13 @@ function getPaginationAndSorting(input: PaginationInput) {
 }
 
 // Helper function to check if a user has liked a fight
-async function hasUserLikedFight(ctx: Context, fight: Fight) {
+async function hasUserLikedFight(ctx: Context, fightId: number) {
   return ctx.session && ctx.session.user
     ? (await ctx.prisma.like.findUnique({
         where: {
           userId_fightId: {
             userId: ctx.session.user.id,
-            fightId: fight.id,
+            fightId: fightId,
           },
         },
       })) != null
@@ -166,53 +160,6 @@ export const fightRouter = createTRPCRouter({
 
       return { message: "Fight deleted successfully" };
     }),
-  getAllByUser: publicProcedure
-    .input(
-      z.object({
-        userid: z.string(),
-        page: z.number().optional(),
-        sort: z.string().optional(),
-      })
-    ) // accept userid, page, and sort as input
-    .query(async ({ input, ctx }) => {
-      const { userid } = input; // get the userid from the input
-      const { limit, offset, orderBy } = getPaginationAndSorting(input);
-
-      const fights = await ctx.prisma.fight.findMany({
-        where: {
-          createdById: userid, // use the userid to fetch the fights
-        },
-        include: { createdBy: true }, // Include the createdBy user
-        orderBy,
-        take: limit,
-        skip: offset,
-      });
-
-      // Get the names of the fighters and ensure createdBy.name is not null
-      const fightsWithNames = fights.map(async (fight) => {
-        const { fighter1Name, fighter2Name } = await getFighterNames(
-          ctx,
-          fight
-        );
-
-        // Check if the user has liked the fight
-        const hasUserLiked = await hasUserLikedFight(ctx, fight);
-
-        return {
-          ...fight,
-          fighter1Name: fighter1Name,
-          fighter2Name: fighter2Name,
-          createdBy: {
-            ...fight.createdBy,
-            name: fight.createdBy.name || "Unknown",
-          },
-          likeCount: fight.likeCount, // Directly access the likeCount field
-          hasUserLiked, // Return whether the user has liked the fight
-        };
-      });
-
-      return Promise.all(fightsWithNames);
-    }),
   getAllSummariesByUser: publicProcedure
     .input(
       z.object({
@@ -229,7 +176,21 @@ export const fightRouter = createTRPCRouter({
         where: {
           createdById: userid, // use the userid to fetch the fights
         },
-        include: { createdBy: true }, // Include the createdBy user
+        select: {
+          id: true,
+          fightLog: true,
+          likeCount: true,
+          views: true,
+          createdById: true,
+          fighter1Id: true,
+          fighter2Id: true,
+          createdBy: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
         orderBy,
         take: limit,
         skip: offset,
@@ -239,61 +200,23 @@ export const fightRouter = createTRPCRouter({
       const fightsWithNames = fights.map(async (fight) => {
         const { fighter1Name, fighter2Name } = await getFighterNames(
           ctx,
-          fight
+          { fighter1Id: fight.fighter1Id, fighter2Id: fight.fighter2Id }
         );
 
         // Check if the user has liked the fight
-        const hasUserLiked = await hasUserLikedFight(ctx, fight);
+        const hasUserLiked = await hasUserLikedFight(ctx, fight.id);
 
         return {
-          ...fight,
+          id: fight.id, // Return the id of the fight
           fightLog: getFirst55Words(fight.fightLog),
           fighter1Name: fighter1Name,
           fighter2Name: fighter2Name,
           createdBy: {
-            ...fight.createdBy,
+            id: fight.createdBy.id,
             name: fight.createdBy.name || "Unknown",
           },
           likeCount: fight.likeCount, // Directly access the likeCount field
-          hasUserLiked, // Return whether the user has liked the fight
-        };
-      });
-
-      return Promise.all(fightsWithNames);
-    }),
-  getAll: publicProcedure
-    .input(
-      z.object({ page: z.number().optional(), sort: z.string().optional() })
-    ) // accept page and sort as input
-    .query(async ({ input, ctx }) => {
-      const { limit, offset, orderBy } = getPaginationAndSorting(input);
-
-      const fights = await ctx.prisma.fight.findMany({
-        include: { createdBy: true },
-        orderBy,
-        take: limit,
-        skip: offset,
-      });
-
-      // Get the names of the fighters and ensure createdBy.name is not null
-      const fightsWithNames = fights.map(async (fight) => {
-        const { fighter1Name, fighter2Name } = await getFighterNames(
-          ctx,
-          fight
-        );
-
-        // Check if the user has liked the fight
-        const hasUserLiked = await hasUserLikedFight(ctx, fight);
-
-        return {
-          ...fight,
-          fighter1Name: fighter1Name,
-          fighter2Name: fighter2Name,
-          createdBy: {
-            ...fight.createdBy,
-            name: fight.createdBy.name || "Unknown",
-          },
-          likeCount: fight.likeCount, // Directly access the likeCount field
+          views: fight.views ?? 0, // Assuming 0 as a default value for views
           hasUserLiked, // Return whether the user has liked the fight
         };
       });
@@ -308,7 +231,12 @@ export const fightRouter = createTRPCRouter({
       const { limit, offset, orderBy } = getPaginationAndSorting(input);
 
       const fights = await ctx.prisma.fight.findMany({
-        include: { createdBy: true },
+        include: { createdBy: {
+          select: {
+            id: true,
+            name: true,
+          },
+        }},
         orderBy,
         take: limit,
         skip: offset,
@@ -318,14 +246,14 @@ export const fightRouter = createTRPCRouter({
       const fightsWithNames = fights.map(async (fight) => {
         const { fighter1Name, fighter2Name } = await getFighterNames(
           ctx,
-          fight
+          { fighter1Id: fight.fighter1Id, fighter2Id: fight.fighter2Id }
         );
 
         // Check if the user has liked the fight
-        const hasUserLiked = await hasUserLikedFight(ctx, fight);
+        const hasUserLiked = await hasUserLikedFight(ctx, fight.id);
 
         return {
-          ...fight,
+          id: fight.id, // Return the id of the fight
           fightLog: getFirst55Words(fight.fightLog),
           fighter1Name: fighter1Name,
           fighter2Name: fighter2Name,
@@ -334,6 +262,7 @@ export const fightRouter = createTRPCRouter({
             name: fight.createdBy.name || "Unknown",
           },
           likeCount: fight.likeCount, // Directly access the likeCount field
+          views: fight.views ?? 0, // Assuming 0 as a default value for views
           hasUserLiked, // Return whether the user has liked the fight
         };
       });
@@ -353,7 +282,7 @@ export const fightRouter = createTRPCRouter({
         throw new Error("Fight not found");
       }
 
-      const { fighter1Name, fighter2Name } = await getFighterNames(ctx, fight);
+      const { fighter1Name, fighter2Name } = await getFighterNames(ctx, { fighter1Id: fight.fighter1Id, fighter2Id: fight.fighter2Id });
 
       // Check if the user has liked the fight
       // Since the single story page is server side rendered, we must get userId from the input
@@ -366,14 +295,16 @@ export const fightRouter = createTRPCRouter({
         : false;
 
       return {
-        ...fight,
         fighter1Name: fighter1Name,
         fighter2Name: fighter2Name,
         createdBy: fight.createdBy, // Return the createdBy user
         id: fight.id, // Return the id of the fight
         likeCount: fight.likeCount, // Directly access the likeCount field
+        fightLog: fight.fightLog,
+        views: fight.views ?? 0, // Assuming 0 as a default value for views
         hasUserLiked, // Return whether the user has liked the fight
-      };
+        time: fight.time, // Convert the time to ISO string
+      };  
     }),
   addView: publicProcedure
     .input(z.object({ userId: z.string(), fightId: z.number().optional() }))
@@ -396,3 +327,4 @@ export const fightRouter = createTRPCRouter({
       return { message: "View added successfully" };
     }),
 });
+

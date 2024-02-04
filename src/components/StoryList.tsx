@@ -16,16 +16,7 @@ type ExtendedStoryListProps = StoryListProps & {
 };
 
 const StoryList: React.FC<ExtendedStoryListProps> = ({ currentUserId, stories, isLoading, hasMore, fetchMoreData, setSort, sort, handleDelete }) => {
-  const handleSortChange = (newSort: string) => {
-    if (newSort !== sort) {
-      setSort(newSort);
-      // Reset any relevant pagination state here, if applicable
-      // For example, if you have a `resetPagination` function or need to set `page` state to 1
-      // resetPagination(); or setPage(1);
-      // Then, trigger a refetch based on the new sort criteria
-      // This might involve calling `fetchMoreData` directly or through another function that resets the data and fetches
-    }
-  };
+
 
   return (
     <InfiniteScroll
@@ -62,19 +53,19 @@ const StoryList: React.FC<ExtendedStoryListProps> = ({ currentUserId, stories, i
       <div className="flex space-x-4 border rounded-full p-2 bg-black mb-4">
         <button 
           className={`px-4 py-2 rounded-full ${sort === 'newest' ? 'bg-[hsl(260,100%,60%)] text-white' : 'bg-[hsl(280,100%,70%)] text-black'}`} 
-          onClick={() => handleSortChange("newest")}
+          onClick={() => setSort("newest")}
         >
           Newest
         </button>
         <button 
           className={`px-4 py-2 rounded-full ${sort === 'mostViewed' ? 'bg-[hsl(260,100%,60%)] text-white' : 'bg-[hsl(280,100%,70%)] text-black'}`} 
-          onClick={() => handleSortChange("mostViewed")}
+          onClick={() => setSort("mostViewed")}
         >
           Most Viewed
         </button>
         <button 
           className={`px-4 py-2 rounded-full ${sort === 'mostLiked' ? 'bg-[hsl(260,100%,60%)] text-white' : 'bg-[hsl(280,100%,70%)] text-black'}`} 
-          onClick={() => handleSortChange("mostLiked")}
+          onClick={() => setSort("mostLiked")}
         >
           Most Liked
         </button>

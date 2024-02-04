@@ -39,9 +39,10 @@ export const useStories = (userid?: string, initialPage = 1, initialSort = 'newe
         createdBy: {
           ...story.createdBy,
           name: story.createdBy.name || "Unknown",
-          email: story.createdBy.email || "",
-          image: story.createdBy.image || "",
         },
+        // Use the id from createdBy object directly
+        createdById: story.createdBy.id,
+        views: story.views ?? 0, // Assuming 0 as a default value for views
       }));
 
       if (fetchedStories.length === 0) {
@@ -54,7 +55,7 @@ export const useStories = (userid?: string, initialPage = 1, initialSort = 'newe
           ...prevStories,
 
           // Add the new stories from updatedStories, but only if they don't already exist in prevStories
-          ...updatedStories
+          ...updatedStories.filter(story => !prevStories.some(prev => prev.id === story.id))
         ]);
       }
     }

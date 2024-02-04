@@ -1,41 +1,24 @@
 export type User = {
   name: string;
-  email: string;
-  image: string;
+  email?: string;
+  image?: string;
   id: string;
 };
 
 export type Story = {
-  fighter1Name: string | null;
-  fighter2Name: string | null;
-  createdBy: User;
   id: number;
   fightLog: string;
-  fighter1Id: number;
-  fighter2Id: number;
-  //winnerId: number | null;
-  fightWinner: string | null;
-  time: string | Date; // Adjusted to accept both Date and string
-  createdById: string;
+  fighter1Name: string;
+  fighter2Name: string;
+  createdBy: {
+    id: string;
+    name: string;
+  };
   likeCount: number;
   hasUserLiked: boolean;
-  views: number;
+  views?: number;
+  createdAt?: string;
 };
-
-
-
-// export type DetailedStory = {
-//   fighter1Name: string | null;
-//   fighter2Name: string | null;
-//   createdBy: User;
-//   id: number;
-//   fightLog: string;
-//   fighter1Id: number;
-//   fighter2Id: number;
-//   winnerId: number | null;
-//   time: Date;
-//   createdById: string;
-// };
 
 export type StoryListProps = {
   stories: Story[];
