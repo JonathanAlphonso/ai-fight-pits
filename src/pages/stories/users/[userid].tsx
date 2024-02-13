@@ -21,8 +21,28 @@ const UserStories: NextPage<UserStoriesProps> = ({ userid }) => {
 
   if (currentUserId !== userid) {
     const name = stories[0]?.createdBy.name || "Unknown";
+    if (name === "Unknown") {
+      return (
+        <>
+          <Head>
+            <title>Story Not Found</title>
+            <meta name="description" content="The requested story creator could not be found" />
+            <link rel="icon" href="/favicon.ico" />
+          </Head>
+          <main className="flex flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] sm:min-h-screen">
+            <div className="container flex flex-col items-center justify-center gap-4 px-4 py-4 sm:max-w-2xl sm:gap-12 sm:px-4 sm:py-16">
+              <div className="text-lg text-white sm:text-2xl">
+                <h1 className="text-6xl font-bold text-white">Story Creator Not Found</h1>
+              </div>
+            </div>
+          </main>
+        </>
+      );
+    }
     title = `${name}'s Fight Stories`;
   }
+
+  
 
   return (
     <>

@@ -25,8 +25,27 @@ type StoryPageProps = {
   };
 };
 
-const SingleStoryPage: NextPage<StoryPageProps> = ({ storyData: story }) => {
+const SingleStoryPage: NextPage<StoryPageProps & { error?: string }> = ({ storyData: story, error }) => {
   const isLoading = false;
+
+  if (error) {
+    return (
+      <>
+        <Head>
+          <title>Story Not Found</title>
+          <meta name="description" content="The requested story could not be found" />
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
+        <main className="flex flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] sm:min-h-screen">
+          <div className="container flex flex-col items-center justify-center gap-4 px-4 py-4 sm:max-w-2xl sm:gap-12 sm:px-4 sm:py-16">
+            <div className="text-lg text-white sm:text-2xl">
+              <h1 className="text-6xl font-bold text-white">{error}</h1>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -83,31 +102,43 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const ssg = ssgHelper();
   const id = context.params?.id;
 
-  if (!id || isNaN(Number(id))) {
+  // Check if 'id' is not null and is a valid number
+  if (!id || typeof id !== 'string' || isNaN(Number(id))) {
     return {
-      notFound: true,
-    };
-  }
-  // Increase the views for the story
-  await ssg.fight.addView.fetch({ userId: session?.user.id ||'', fightId: Number(id) });
-  
-
-  let storyData = await ssg.fight.getOne.fetch({ userId: session?.user.id ||'', fightId: Number(id) });
-
-  if (storyData.time) {
-    storyData = {
-      ...storyData,
-      // @ts-expect-error: bullshit can't serialize date but also doesn't want to convert to string
-      time: (storyData.time as unknown as Date).toISOString(),
+      props: {
+        error: "Invalid Story ID", // Provide a more user-friendly error message
+      },
     };
   }
 
-  return {
-    props: {
-      session,
-      storyData,
-    },
-  };
+  try {
+    await ssg.fight.addView.fetch({ userId: session?.user.id || '', fightId: Number(id) });
+
+    let storyData = await ssg.fight.getOne.fetch({ userId: session?.user.id || '', fightId: Number(id) });
+
+    if (storyData.time) {
+      storyData = {
+        ...storyData,
+        // @ts-expect-error: bullshit can't serialize date but also doesn't want to convert to string
+        time: (storyData.time).toISOString(),
+      };
+    }
+
+    return {
+      props: {
+        session,
+        storyData,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to fetch story data:", error);
+    // Instead of removing the ts-ignore, handle the error by returning a specific flag or message
+    return {
+      props: {
+        error: "Story ID Not Found", // You can use this error prop to conditionally render the error message in your component
+      },
+    };
+  }
 };
 
 export default SingleStoryPage;

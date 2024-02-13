@@ -38,7 +38,7 @@ export const useStories = (userid?: string, initialPage = 1, initialSort = 'newe
         ...story,
         createdBy: {
           ...story.createdBy,
-          name: story.createdBy.name || "Unknown",
+          name: story.createdBy.name,
         },
         // Use the id from createdBy object directly
         createdById: story.createdBy.id,
