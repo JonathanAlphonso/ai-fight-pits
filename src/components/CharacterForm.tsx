@@ -29,6 +29,7 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
     {
       enabled: false,
       onSuccess: (newFight) => {
+        setError("");
         if (!newFight || newFight.length < 200) {
           setError("Fighters not permitted. Try different fighters.");
           console.log("Fighters not permitted. Try different fighters.");
@@ -58,6 +59,10 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
         } else {
           console.log("No user logged in, not posting fight to database.");
         }
+      },
+      onError: (error) => {
+        // Handle the error from gpt.getGPT3Response here
+        setError(error.message);
       },
     }
   );
@@ -111,6 +116,7 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
           {characterError}
         </div>
       )}
+      
       <div className="mt-12 flex justify-center gap-4 md:gap-8">
         <button
           type="submit"

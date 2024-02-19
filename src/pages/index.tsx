@@ -41,7 +41,7 @@ const Home: NextPage = () => {
           {isLoading ? (
             <ClipLoader color={"#ffffff"} size={150} />
           ) : error ? ( // If there's an error, display it
-            <div className="text-left text-4xl text-red-500">{error}</div>
+            <div className="text-left text-4xl text-red-500">{error}</div> //API errors are shown here, CharacterForm.tsx has form errors
           ) : response ? (
             <StoryFormatter
               text={response.story}

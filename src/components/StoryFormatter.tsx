@@ -3,6 +3,7 @@ import { VscHeart, VscHeartFilled, VscEye } from "react-icons/vsc";
 import { useState } from "react";
 import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
+import { useRouter } from 'next/router';
 
 interface StoryFormatterProps {
   text: string;
@@ -23,6 +24,8 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
   hasUserLiked,
   views,
 }) => {
+  const router = useRouter();
+
   // Remove all quotes
   const trimmedText = text.replace(/"/g, "");
 
@@ -80,19 +83,21 @@ const StoryFormatter: React.FC<StoryFormatterProps> = ({
           {paragraph}
         </p>
       ))}
-      <div className="flex items-center space-x-4">
-        <button
-          onClick={handleLikeClick}
-          className={`inline-flex w-12 items-center justify-around rounded-lg border border-white p-2 ${
-            liked ? "text-red-500" : "text-white"
-          }`}
-        >
-          {liked ? <VscHeartFilled /> : <VscHeart />}
-          <span className="ml-1 text-white">{displayedLikes}</span>
-        </button>
-        <VscEye />
-        <span className="ml-1 text-white">{views}</span>
-      </div>
+      {router.pathname !== '/' && (
+        <div className="statistics flex items-center space-x-4">
+          <button
+            onClick={handleLikeClick}
+            className={`inline-flex w-12 items-center justify-around rounded-lg border border-white p-2 ${
+              liked ? "text-red-500" : "text-white"
+            }`}
+          >
+            {liked ? <VscHeartFilled /> : <VscHeart />}
+            <span className="ml-1 text-white">{displayedLikes}</span>
+          </button>
+          <VscEye />
+          <span className="ml-1 text-white">{views}</span>
+        </div>
+      )}
     </div>
   );
 };
