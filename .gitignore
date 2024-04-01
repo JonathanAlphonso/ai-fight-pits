@@ -42,3 +42,9 @@ yarn-error.log*
 *.tsbuildinfo
 
 .vercel
+
+#DB management
+/pscale_dump_ai-fight-pits_main_20240401_124342
+/pscale_dump_ai-fight-pits_testing_20240401_124515
+
+/prisma/migrations
