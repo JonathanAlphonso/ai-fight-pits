@@ -36,6 +36,17 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
           return;
         }
       
+        // Set the response state here to ensure it's always updated regardless of login status
+        setResponse({
+          story: newFight,
+          fighter1Name: character1,
+          fighter2Name: character2,
+          likeCount: 0, // default value
+          storyId: -1, // temporary value since we might not have an ID for non-logged-in users
+          hasUserLiked: false, // default value
+        });
+
+        // Only attempt to save the fight details in the database for logged-in users
         if (sessionData?.user) {
           createFight.mutate({
             fightLog: JSON.stringify(newFight),
@@ -43,13 +54,24 @@ const CharacterForm: React.FC<FormProps> = ({ setResponse, setIsLoading, setErro
             fighter2Name: character2,
           }, {
             onSuccess: (createdFight) => {
-              setResponse({
-                story: newFight,
-                fighter1Name: character1,
-                fighter2Name: character2,
-                likeCount: 0, // default value
-                storyId: createdFight.id, // use the id from the created fight
-                hasUserLiked: false, // default value
+              // Ensure we're updating the state in a way that conforms to the Response type
+              setResponse(prevState => {
+                if (prevState === null) {
+                  // Handle the case where prevState is null, if necessary
+                  // For example, return a default state or handle this case differently
+                  return null;
+                }
+                // Return an object that fully conforms to the Response type
+                return {
+                  ...prevState,
+                  storyId: createdFight.id, // Update the storyId with the new value
+                  // Ensure all other properties are defined. If they are optional in your type, adjust accordingly.
+                  story: prevState.story, // Assuming story is already defined in prevState
+                  fighter1Name: prevState.fighter1Name,
+                  fighter2Name: prevState.fighter2Name,
+                  likeCount: prevState.likeCount,
+                  hasUserLiked: prevState.hasUserLiked,
+                };
               });
             },
             onError: (error) => {
